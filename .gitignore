@@ -1,6 +1,7 @@
 #VisualStudio
 /课设代码/GrassGrowingMachine/Debug
 /课设代码/GrassGrowingMachine/release
+/课设代码/GrassGrowingMachine/x64
 /.vs
 /课设代码/GrassGrowingMachine/.vs/
 *.db
