@@ -1,29 +1,29 @@
-#include "SymbolList.h"
+ï»¿#include "SymbolList.h"
 
 int init_symbl()
 {
-	//ËÄÔªÊ½±íÇå¿Õ
+	//å››å…ƒå¼è¡¨æ¸…ç©º
 	SeqLine = 0;
 	memset(SequenceList, 0, MAXSEQLISTSIZE * sizeof(SEQUENCE));
-	//Ö÷±íÇå¿Õ
+	//ä¸»è¡¨æ¸…ç©º
 	SymblLine = 0;
 	memset(SYMBL, 0, MAX_SYMBLISTSIZE * sizeof(SYMBLITEM));
-	//¹ýº¯ÐÅÏ¢±íÇå¿Õ
+	//è¿‡å‡½ä¿¡æ¯è¡¨æ¸…ç©º
 	PFInflLine = 0;
 	memset(PFINFL, 0, MAX_SYMBLISTSIZE * sizeof(PFINFLITEM));
-	//²ÎÊý±íÇå¿Õ
+	//å‚æ•°è¡¨æ¸…ç©º
 	ArglLine = 0;
 	memset(ARGL, 0, MAX_SYMBLISTSIZE * sizeof(ARGLITEM));
-	//ÀàÐÍ±íÇå¿Õ
+	//ç±»åž‹è¡¨æ¸…ç©º
 	TypelLine = 0;
 	memset(TYPEL, 0, MAX_SYMBLISTSIZE * sizeof(TYPELITEM));
-	//³£Êý±íÇå¿Õ
+	//å¸¸æ•°è¡¨æ¸…ç©º
 	ConslLine = 0;
 	memset(CONSL, 0, MAX_SYMBLISTSIZE * sizeof(CONSLITEM));
-	//³¤¶È±íÇå¿Õ
+	//é•¿åº¦è¡¨æ¸…ç©º
 	LenlLine = 0;
 	memset(LENL, 0, MAX_SYMBLISTSIZE * sizeof(int));
-	//ÖÐ¼ä±äÁ¿±íÇå¿Õ
+	//ä¸­é—´å˜é‡è¡¨æ¸…ç©º
 	MidvlLine = 0;
 	memset(MIDVL, 0, MAX_SYMBLISTSIZE * sizeof(MIDVLITEM));
 	return 1;
