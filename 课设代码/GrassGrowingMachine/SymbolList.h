@@ -2,9 +2,6 @@
 #include <string.h>
 #define MAXSEQLISTSIZE 500
 
-//初始化符号表
-int hello(char *str);
-
 typedef enum OPR //四元式操作符
 {
 	PROG, ENT, EXIT, END,
@@ -36,6 +33,9 @@ typedef struct SEQUENCE //四元式
 	SEQARG arg1, arg2, target;
 }SEQUENCE;
 
-//int SeqLine; //当前一共占用的行数，也就是说有效数据的范围为SequenceList[0~SeqLine-1]
-//
-//SEQUENCE SequenceList[MAXSEQLISTSIZE];
+int SeqLine; //当前一共占用的行数，也就是说有效数据的范围为SequenceList[0~SeqLine-1]
+
+SEQUENCE SequenceList[MAXSEQLISTSIZE];
+
+//初始化符号表
+int init_symbl();

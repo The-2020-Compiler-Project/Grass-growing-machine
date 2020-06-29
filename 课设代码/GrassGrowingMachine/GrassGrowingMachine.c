@@ -6,7 +6,7 @@
 int init()
 {
     init_tables();
-    hello("c");
+    init_symbl();
     printf("initialized!\n");
     return 1;
 }
