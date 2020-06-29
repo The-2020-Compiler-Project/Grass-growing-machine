@@ -47,14 +47,14 @@
     <ClInclude Include="LexicalAnalyser.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Symbl.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Symbl.c">
-      <Filter>源文件</Filter>
-    </ClInclude>
     <ClInclude Include="Optimizer.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SymbolList.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SymbolList.c">
+      <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

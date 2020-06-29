@@ -1,4 +1,4 @@
 #pragma once
 #include "Tables.h"
-#include "Symbl.h"
+#include "SymbolList.h"
 #include "LexicalAnalyser.h"

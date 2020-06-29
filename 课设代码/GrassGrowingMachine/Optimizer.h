@@ -1,2 +1,5 @@
 #pragma once
-#include "Symbl.h"
+#include "SymbolList.h"
+
+
+int optimize(SEQUENCE* Seqlist);

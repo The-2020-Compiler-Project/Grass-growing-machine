@@ -159,8 +159,8 @@
   <ItemGroup>
     <ClInclude Include="Tables.h" />
     <ClInclude Include="LexicalAnalyser.h" />
-    <ClInclude Include="Symbl.h" />
-    <ClInclude Include="Symbl.c" />
+    <ClInclude Include="SymbolList.h" />
+    <ClInclude Include="SymbolList.c" />
     <ClInclude Include="Optimizer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
