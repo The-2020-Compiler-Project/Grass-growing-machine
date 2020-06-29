@@ -1,7 +1,10 @@
 #pragma once
+#include <stdio.h>
 #include <string.h>
 #define MAXTABLELEN 1024
 #define MAXSTRLEN 256
+
+FILE *srcfile; //文件指针
 
 int iTline;	//当前一共占用的行数，也就是说有效数据的范围为iTable[0~iTline-1]
 char iTable[MAXTABLELEN][MAXSTRLEN]; //标识符表

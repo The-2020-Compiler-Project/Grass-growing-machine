@@ -29,3 +29,6 @@ typedef struct TOKEN
 	TOKENTYPE type; //类型
 	int id; //编号
 }TOKEN;
+
+//词法分析器读入下一个单词，输出TOKEN
+TOKEN Next();
