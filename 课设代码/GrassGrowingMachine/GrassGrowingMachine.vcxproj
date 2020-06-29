@@ -148,6 +148,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GrassGrowingMachine.c" />
+    <ClCompile Include="Tables.c" />
+    <ClCompile Include="LexicalAnalyser.c" />
+    <ClCompile Include="GrammarAnalyser.h" />
+    <ClCompile Include="GrammarAnalyser.c" />
+    <ClCompile Include="Optimizer.c" />
+    <ClCompile Include="DestGenerator.h" />
+    <ClCompile Include="DestGenerator.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Tables.h" />
+    <ClInclude Include="LexicalAnalyser.h" />
+    <ClInclude Include="Symbl.h" />
+    <ClInclude Include="Symbl.c" />
+    <ClInclude Include="Optimizer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
