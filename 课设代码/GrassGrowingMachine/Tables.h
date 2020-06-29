@@ -1,25 +1,26 @@
 #pragma once
 #include <stdio.h>
 #include <string.h>
-#define MAXTABLELEN 1024
-#define MAXSTRLEN 256
+#define MAX_TABLELEN 1024
+#define MAX_STRLEN 256
+#define MAX_IDLEN 30
 
 FILE *srcfile; //文件指针
 
 int iTline;	//当前一共占用的行数，也就是说有效数据的范围为iTable[0~iTline-1]
-char iTable[MAXTABLELEN][MAXSTRLEN]; //标识符表
+char iTable[MAX_TABLELEN][MAX_IDLEN]; //标识符表
 
 int cTline;	//当前一共占用的行数，也就是说有效数据的范围为cTable[0~cTline-1]
-char cTable[MAXTABLELEN]; //字符型常量表
+char cTable[MAX_TABLELEN]; //字符型常量表
 
 int sTline; //当前一共占用的行数，也就是说有效数据的范围为sTable[0~sTline-1]
-char sTable[MAXTABLELEN][MAXSTRLEN]; //字符串常量表
+char sTable[MAX_TABLELEN][MAX_STRLEN]; //字符串常量表
 
 int dcTline; //当前一共占用的行数，也就是说有效数据的范围为dcTable[0~dcTline-1]
-int dcTable[MAXTABLELEN]; //整数常数表
+int dcTable[MAX_TABLELEN]; //整数常数表
 
 int fcTline; //当前一共占用的行数，也就是说有效数据的范围为fcTable[0~fcTline-1]
-double fcTable[MAXTABLELEN]; //浮点常数表
+double fcTable[MAX_TABLELEN]; //浮点常数表
 
 //初始化表以及有效行数
 int init_tables();

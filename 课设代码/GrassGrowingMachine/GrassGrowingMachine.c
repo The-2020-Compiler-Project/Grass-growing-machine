@@ -10,16 +10,20 @@ int init()
     srcfile = NULL;
     init_tables();
     init_symbl();
-    printf("initialized!\n");
+    printf("Tables initialized!\n");
     return 1;
 }
 
 int main(char argc, char* argv[])
 {
-    init();
+    if (!init())
+    {
+        printf("初始化失败！");
+        return -1;
+    }
     if (DEBUG)
     {
-        if (!(srcfile = fopen("../Hello.ggml", "r")))
+        if (!(srcfile = fopen("Hello.ggml", "r")))
         {
             printf("Hello.ggml文件不存在！");
             return -1;
