@@ -21,39 +21,39 @@
     <ClCompile Include="Tables.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="LexicalAnalyser.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Optimizer.c">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="DestGenerator.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="SymbolList.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="GrammarAnalyser.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="SymbolList.c">
+    <ClCompile Include="LexicalAnalyser.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Tables.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="LexicalAnalyser.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Optimizer.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="DestGenerator.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="SymbolList.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
     <ClInclude Include="GrammarAnalyser.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="SymbolList.h">
+    <ClInclude Include="Tables.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LexicalAnalyser.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

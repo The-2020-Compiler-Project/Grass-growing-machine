@@ -1,77 +1,94 @@
-#pragma once
+ï»¿#pragma once
+#include <string.h>
 #include "Tables.h"
 #include "SymbolList.h"
 #include "LexicalAnalyser.h"
 
-//Óï·¨¡¢ÓïÒå·ÖÎö¡¢Éú³ÉËÄÔªÊ½
+//è¯­æ³•ã€è¯­ä¹‰åˆ†æã€ç”Ÿæˆå››å…ƒå¼
 int GrammarAnalyse();
 
-//½ÓÊÜ´íÎóºÅ²¢ÍË³ö³ÌĞò
+//å¡«å†™ç¬¦å·è¡¨æ‰€éœ€è¦çš„çŠ¶æ€é‡
+int iAvalDSegOffset; //å½“å‰æ•°æ®æ®µå¯ç”¨åŒºè·
+PFINFLITEM* currentFunc; //å½“å‰æ‰€åœ¨çš„å‡½æ•°å®šä¹‰åŒºåŸŸï¼Œè‹¥ä¸åœ¨å‡½æ•°åŒºåŸŸä¸­åˆ™ä¸ºNULL
+int iArgNum; //å½“å‰å‡½æ•°çš„å‚æ•°ä¸ªæ•°
+ARGLITEM* ptrFirstArg; //å½“å‰å‡½æ•°çš„ç¬¬ä¸€ä¸ªå‚æ•°
+int iFuncVarDefMode; //å‡½æ•°å†…å˜é‡å®šä¹‰æ¨¡å¼ï¼Œ0ä¸ºèµ‹å€¼å½¢å‚ï¼Œ1ä¸ºæ¢åå½¢å‚ï¼Œ2ä¸ºå±€éƒ¨å˜é‡
+int iAvalFuncOffset; //å½“å‰å‡½æ•°å¯ç”¨åŒºè·
+struct exprProcessedType
+{
+	enum type{exprNULL, exprINT, exprREAL, exprID}type;
+	union content
+	{
+		int d;
+		double f;
+		char *ptrID; //æŒ‡å‘ç»è¿‡è¡¨è¾¾å¼è¯†åˆ«å¤„ç†åçš„æ ‡è¯†ç¬¦åæˆ–ä¸´æ—¶å˜é‡å
+	}content;
+}exprProcessed;
+
+//æ¥å—é”™è¯¯å·å¹¶é€€å‡ºç¨‹åº
 int SendError(int err_id);
 
-//µİ¹éÏÂ½µ×Ó³ÌĞò£¨¾ùÒÔ¡®g¡¯¿ªÍ·£©
+//é€’å½’ä¸‹é™å­ç¨‹åºï¼ˆå‡ä»¥â€˜gâ€™å¼€å¤´ï¼‰
 
-//³ÌĞò
+//ç¨‹åº
 TOKEN gProgram(TOKEN preTOKEN);
-//³ÌĞòÍ·ÉùÃ÷
+//ç¨‹åºå¤´å£°æ˜
 TOKEN gHeadOfProgram(TOKEN preTOKEN);
-//±êÊ¶·û
-TOKEN gIdentifier(TOKEN preTOKEN);
-//È«¾Ö±äÁ¿ÉùÃ÷Çø
+//å…¨å±€å˜é‡å£°æ˜åŒº
 TOKEN gDeclVars(TOKEN preTOKEN);
-//±äÁ¿¶¨Òå
+//å˜é‡å®šä¹‰
 TOKEN gVarDef(TOKEN preTOKEN);
-//Êı¾İÀàĞÍ
-TOKEN gDataType(TOKEN preTOKEN);
-//º¯ÊıÉùÃ÷Çø
+//å‡½æ•°å£°æ˜åŒº
 TOKEN gDeclFuncs(TOKEN preTOKEN);
-//º¯Êı¶¨Òå
+//å‡½æ•°å®šä¹‰
 TOKEN gFuncDef(TOKEN preTOKEN);
-//²ÎÊıÉùÃ÷Çø
+//å‚æ•°å£°æ˜åŒº
 TOKEN gDeclArgs(TOKEN preTOKEN);
-//¸³ÖµĞÎ²ÎÉùÃ÷Çø
+//èµ‹å€¼å½¢å‚å£°æ˜åŒº
 TOKEN gDeclVfs(TOKEN preTOKEN);
-//»»ÃûĞÎ²ÎÉùÃ÷Çø
+//æ¢åå½¢å‚å£°æ˜åŒº
 TOKEN gDeclVns(TOKEN preTOKEN);
-//º¯Êı±äÁ¿¶¨Òå
+//ä¸´æ—¶å˜é‡å£°æ˜åŒº
+TOKEN gDeclFuncVars(TOKEN preTOKEN);
+//å‡½æ•°å˜é‡å®šä¹‰
 TOKEN gFuncVarDef(TOKEN preTOKEN);
-//º¯ÊıÌå
+//å‡½æ•°ä½“
 TOKEN gFuncBody(TOKEN preTOKEN);
-//º¯ÊıÓï¾ä
+//å‡½æ•°å¤åˆè¯­å¥
 TOKEN gFuncCode(TOKEN preTOKEN);
-//·µ»ØÓï¾ä
+//è¿”å›è¯­å¥
 TOKEN gCodeReturn(TOKEN preTOKEN);
-//³ÌĞòÌå
+//ç¨‹åºä½“
 TOKEN gProgramBody(TOKEN preTOKEN);
-//¸´ºÏÓï¾ä
-TOKEN gCompCode(TOKEN preTOKEN);
-//¸³ÖµÓï¾ä
+//ç¨‹åºè¯­å¥
+TOKEN gProgCode(TOKEN preTOKEN);
+//èµ‹å€¼è¯­å¥
 TOKEN gCodeAssign(TOKEN preTOKEN);
-//´òÓ¡Óï¾ä
+//æ‰“å°è¯­å¥
 TOKEN gCodePrint(TOKEN preTOKEN);
-//½áÊøÓï¾ä
+//ç»“æŸè¯­å¥
 TOKEN gCodeEnd(TOKEN preTOKEN);
-//Ìõ¼şÓï¾ä
+//æ¡ä»¶è¯­å¥
 TOKEN gCodeIF(TOKEN preTOKEN);
-//Ñ­»·Óï¾ä
+//å¾ªç¯è¯­å¥
 TOKEN gCodeWhile(TOKEN preTOKEN);
-//º¯Êıµ÷ÓÃÓï¾ä
+//å‡½æ•°è°ƒç”¨è¯­å¥
 TOKEN gCodeCall(TOKEN preTOKEN);
-//±í´ïÊ½
+//è¡¨è¾¾å¼
 TOKEN gExpr(TOKEN preTOKEN);
-//Âß¼­ºó×ºÊ½
+//é€»è¾‘åç¼€å¼
 TOKEN gLogicSuffix(TOKEN preTOKEN);
-//¹ØÏµ±í´ïÊ½
+//å…³ç³»è¡¨è¾¾å¼
 TOKEN gRelationExpr(TOKEN preTOKEN);
-//¹ØÏµºó×ºÊ½
+//å…³ç³»åç¼€å¼
 TOKEN gRelationSuffix(TOKEN preTOKEN);
-//ËãÊõ±í´ïÊ½
+//ç®—æœ¯è¡¨è¾¾å¼
 TOKEN gMathExpr(TOKEN preTOKEN);
-//¼Ó·¨ºó×ºÊ½
+//åŠ æ³•åç¼€å¼
 TOKEN gAddSuffix(TOKEN preTOKEN);
-//³Ë·¨±í´ïÊ½
+//ä¹˜æ³•è¡¨è¾¾å¼
 TOKEN gMulExpr(TOKEN preTOKEN);
-//³Ë·¨ºó×ºÊ½
+//ä¹˜æ³•åç¼€å¼
 TOKEN gMulSuffix(TOKEN preTOKEN);
-//Ïî
+//é¡¹
 TOKEN gTerm(TOKEN preTOKEN);
