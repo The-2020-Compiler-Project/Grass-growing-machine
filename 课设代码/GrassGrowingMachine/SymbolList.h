@@ -1,5 +1,6 @@
 #pragma once
 #include <string.h>
+#include <stdbool.h>
 #include "Tables.h"
 #define MAXSEQLISTSIZE 500
 #define MAX_SYMBLISTSIZE 200
@@ -35,6 +36,7 @@ typedef struct SEQARG //四元式参数
 		int d;
 		double f;
 	}content;
+	bool active; //活跃信息
 }SEQARG;
 
 typedef struct SEQUENCE //四元式
@@ -45,6 +47,7 @@ typedef struct SEQUENCE //四元式
 
 int SeqLine; //当前已占用的行数，也就是说有效数据的范围为SequenceList[0~SeqLine-1]
 SEQUENCE SequenceList[MAXSEQLISTSIZE]; //四元式列表
+SEQUENCE OptimizedSeqList[MAXSEQLISTSIZE]; //优化后的四元式列表
 
 //发送一条四元式至SequenceList[SeqLine],并++SeqLine
 int sendSequence(SEQUENCE seq);
