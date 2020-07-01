@@ -6,6 +6,8 @@ int init_symbl()
 	//四元式表清空
 	SeqLine = 0;
 	memset(SequenceList, 0, MAXSEQLISTSIZE * sizeof(SEQUENCE));
+	OptSeqLine = 0;
+	memset(OptimizedSeqList, 0, MAXSEQLISTSIZE * sizeof(SEQUENCE));
 	//主表清空
 	SymblLine = 0;
 	memset(SYMBL, 0, MAX_SYMBLISTSIZE * sizeof(SYMBLITEM));

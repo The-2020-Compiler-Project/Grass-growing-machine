@@ -47,6 +47,7 @@ typedef struct SEQUENCE //四元式
 
 int SeqLine; //当前已占用的行数，也就是说有效数据的范围为SequenceList[0~SeqLine-1]
 SEQUENCE SequenceList[MAXSEQLISTSIZE]; //四元式列表
+int OptSeqLine; //当前已占用的行数，也就是说有效数据的范围为OptimizedSeqList[0~OptSeqLine-1]
 SEQUENCE OptimizedSeqList[MAXSEQLISTSIZE]; //优化后的四元式列表
 
 //发送一条四元式至SequenceList[SeqLine],并++SeqLine
