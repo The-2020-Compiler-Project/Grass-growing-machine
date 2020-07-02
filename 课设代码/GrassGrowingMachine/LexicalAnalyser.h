@@ -12,14 +12,14 @@ typedef enum KEYWORD	//关键字种类
 {
 	kINT, kCHAR, kREAL, kPROGRAM, 
 	kFUNCTION, kVAR, kARGS, kVAL, 
-	kPTR, kBODY, kRETURN, kIF, 
+	kPTR, kBODY, kRETURN, kIF, kELSE,
 	kWHILE, kENDP, kPUTC, kAND, kOR
 }KEYWORD;
 
 typedef enum PSYMBOL	//界符种类
 {
 	pLE, pGE, pEQL, pASSI, 	//<=, >=, ==, =
-	pLT, pGT, pADD, pSUB, //<, >, +, -
+	pLT, pGT, pNEQ, pADD, pSUB, //<, >,!=, +, -
 	pMUL, pDIV, pMOD, pLBRACE, //*, /, %, {
 	pRBRACE, pLBRACKET, pRBRACKET, pSEMI //}, (, ), ;
 }PSYMBOL;
