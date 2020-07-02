@@ -11,7 +11,7 @@
 
 typedef enum OPR //四元式操作符
 {
-	PROG, GV, GE, ENT, EXIT, END,
+	PROG, GV, GVE, ENT, EXIT, END,
 	VAR, VF, VN, VT, 
 	ADD, SUB, MUL, DIV, MOD, ASSI,
 	GT, GE, LT, LE, EQ, NE, AND, OR, 
