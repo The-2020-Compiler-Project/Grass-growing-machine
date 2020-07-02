@@ -25,7 +25,7 @@ typedef enum KEYWORD	//关键字种类
 typedef enum PSYMBOL	//界符种类
 {
 	pLE, pGE, pEQL, pASSI, 	//<=, >=, ==, =
-	pLT, pGT, pADD, pSUB, //<, >, +, -
+	pLT, pGT, pNEQ, pADD, pSUB, //<, >,!=, +, -
 	pMUL, pDIV, pMOD, pLBRACE, //*, /, %, {
 	pRBRACE, pLBRACKET, pRBRACKET, pSEMI //}, (, ), ;
 }PSYMBOL;

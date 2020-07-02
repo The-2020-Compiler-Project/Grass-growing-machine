@@ -23,8 +23,8 @@ typedef enum OPR //四元式操作符
 
 typedef enum SEQARGTYPE
 {
-	//空，临时变量，标识符，整型常数，实型常数
-	seqNONE, seqMIDVAR, seqID, seqDC, seqFC
+	//空，临时变量，标识符，整型常数，实型常数, 字符型常数
+	seqNONE, seqMIDVAR, seqID, seqDC, seqFC, seqCHAR
 }SEQARGTYPE;
 
 typedef struct SEQARG //四元式参数
@@ -32,8 +32,9 @@ typedef struct SEQARG //四元式参数
 	SEQARGTYPE type; //类型
 	union content //内容
 	{
-		char* str; //指向标识符表或临时变量表的指针
+		char* str; //指向标识符表中字符串或临时变量表中字符串的指针
 		int d;
+		char ch;
 		double f;
 	}content;
 	bool active; //活跃信息
@@ -132,7 +133,6 @@ int LENL[MAX_SYMBLISTSIZE]; //长度表
 typedef struct MIDVLITEM //中间（临时）变量表项
 {
 	char name[MAX_IDLEN]; //变量名
-	int DEPTH; //变量所在递归深度（设程序主体，即未调用函数时为0）
 	TYPELITEM *type; //数据类型
 	int OFFSET; //区距
 }MIDVLITEM;
