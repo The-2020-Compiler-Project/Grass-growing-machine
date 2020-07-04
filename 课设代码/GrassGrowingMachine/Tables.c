@@ -26,11 +26,11 @@ int new_iTableItem(char* name)
 {
 	if (iTline < MAX_TABLELEN)
 	{
-		for (int i = 0; i <= sizeof(name); i++)
+		for (int i = 0; i < MAX_IDLEN; i++)
 		{
 			iTable[iTline][i] = name[i];
-			iTline++;
 		}
+		iTline++;
 		return 1;
 	}
 	else
@@ -61,7 +61,7 @@ int new_sTableItem(char* str)
 {
 	if (sTline < MAX_TABLELEN)
 	{
-		for (int i = 0; i <= sizeof(str); i++)
+		for (int i = 0; i < sizeof(str); i++)
 		{
 			sTable[sTline][i] = str[i];
 			sTline++;

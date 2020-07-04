@@ -5,7 +5,7 @@
 #define MAX_STRLEN 256
 #define MAX_IDLEN 30
 
-FILE *srcfile; //文件指针
+FILE* srcfile; //文件指针
 
 int iTline;	//当前一共占用的行数，也就是说有效数据的范围为iTable[0~iTline-1]
 char iTable[MAX_TABLELEN][MAX_IDLEN]; //标识符表

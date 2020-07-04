@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "Tables.h"
 #include "SymbolList.h"
+#include "LexicalAnalyser.h"
 
 const int DEBUG = 1;
 
@@ -36,6 +37,8 @@ int main(char argc, char* argv[])
     }
     printf("文件读取成功!");
     //此处以后可以进行文件的读取操作测试等
+
+    LexicalAnalyser(srcfile);
 
     return 0;
 }
