@@ -36,26 +36,21 @@ typedef struct TOKEN
 	int id; //编号
 }TOKEN;
 
-//生成的Token序列
-TOKEN tokenFinal[10000];
-//Token序列的长度
-int tokenSize;
-//当前读到的Token序列位置
-int tokenPos;
-
 //当前单词
 char word[MAX_IDLEN];
 //当前单词大小
 int wordSize;
+//读到的下一个符号
+TOKEN sign;
+//自动机当前状态
+int pre_State = 0;
 //初始化当前单词和单词的大小，成功则返回1
 int initWord();
-//初始化Token序列数组，成功则返回1
-int initToken();
 //弹出word的最后一位字符，成功则返回1
 int wordPop();
 
-//确定自动机下一状态，参数：前一状态，读到的下一个字符，当前读到的单词的长度，当前读到的单词，返回自动机的下一状态码
-int transition(int preState, char nextChar, int wordSize, char* word);
+//确定自动机下一状态，参数：前一状态，读到的下一个字符，返回自动机的下一状态码
+int transition(int preState, char nextChar);
 //自动机状态转换，参数：前一状态，要读取的文件指针，文件读到结尾时返回1
 int ToNext(int preState, FILE* fp);
 
@@ -102,6 +97,3 @@ TOKEN getNext(TOKENTYPE type, int id);
 
 //读取下一个符号的Token项，参数：单词类型，单词编号
 TOKEN Next();
-
-//词法分析器调用，参数：文件指针
-int LexicalAnalyser(FILE* fp);

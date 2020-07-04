@@ -16,20 +16,8 @@ int PTSize = 17;
 //初始化当前单词和单词的大小
 int initWord()
 {
-	for (int i = 0; i < MAX_IDLEN; i++)
-	{
-		word[i] = '\0';
-	}
+	memset(word, MAX_IDLEN * sizeof(int), 0);
 	wordSize = 0;
-	return 1;
-}
-
-//初始化Token序列数组
-int initToken()
-{
-	memset(tokenFinal, 10000 * sizeof(TOKEN), '\0');
-	tokenSize = 0;
-	tokenPos = -1;
 	return 1;
 }
 
@@ -49,7 +37,7 @@ int wordPop()
 }
 
 //确定自动机下一状态，参数：前一状态，读到的下一个字符，返回自动机的下一状态码
-int transition(int preState, char nextChar)
+int transition(int lastState, char nextChar)
 {
 	int nextState = 0;
 	if (nextChar == '\0')
@@ -58,7 +46,7 @@ int transition(int preState, char nextChar)
 	}
 	else
 	{
-		switch (preState)
+		switch (lastState)
 		{
 		case(0):
 			nextState = next0(nextChar);
@@ -103,7 +91,7 @@ int transition(int preState, char nextChar)
 }
 
 //自动机状态转换，参数：前一状态，要读取的文件指针，文件读到结尾时返回1
-int ToNext(int preState, FILE* fp)
+int ToNext(int pastState, FILE* fp)
 {
 	int nextState = 0;
 	int nextChar;
@@ -116,14 +104,13 @@ int ToNext(int preState, FILE* fp)
 	}
 	else
 	{
-		getNext(NOTYPE , 0);
+		PTfunc();
 		printf("LexicalAnalyse Completed!\n");
-		return 1;
+		return 12;
 	}
 
-	nextState = transition(preState, nextChar);
-
-	ToNext(nextState, fp);
+	nextState = transition(pastState, nextChar);
+	return nextState;
 }
 
 //确定当前状态为0时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
@@ -433,7 +420,6 @@ int iTfunc()
 		int j = 0;
 		while (word[j] == iTable[i][j])
 		{
-			int size = sizeof(word);
 			if (j == sizeof(word) - 1)
 			{
 				getNext(ITYPE, i);
@@ -443,13 +429,21 @@ int iTfunc()
 		}
 	}
 	new_iTableItem(word);
-	getNext(ITYPE , iTline - 1);
+	getNext(ITYPE, iTline - 1);
 	return 1;
 }
 
 //将当前字符型常量置入字符表中，并生成对应的Token序列
 int cTfunc()
 {
+	for (int i = 0; i < cTline; i++)
+	{
+		if (word[1] == cTable[i])
+		{
+			getNext(CTYPE, i);
+			return 1;
+		}
+	}
 	new_cTableItem(word[1]);
 	getNext(CTYPE, cTline - 1);
 	return 1;
@@ -458,6 +452,19 @@ int cTfunc()
 //将当前字符串型常量置入字符表中，并生成对应的Token序列
 int sTfunc()
 {
+	for (int i = 0; i < sTline; i++)
+	{
+		int j = 0;
+		while (word[j] == sTable[i][j])
+		{
+			if (j == sizeof(word) - 1)
+			{
+				getNext(STYPE, i);
+				return 1;
+			}
+			j++;
+		}
+	}
 	new_sTableItem(word);
 	getNext(STYPE, sTline - 1);
 	return 1;
@@ -470,6 +477,14 @@ int dcTfunc()
 	for (int i = 0; i < wordSize; i++)
 	{
 		num += (int)(word[i] - 48) * pow(10, wordSize - i - 1);
+	}
+	for (int i = 0; i < dcTline; i++)
+	{
+		if (num == dcTable[i])
+		{
+			getNext(DCTYPE, i);
+			return 1;
+		}
 	}
 	new_dcTableItem(num);
 	getNext(DCTYPE, dcTline - 1);
@@ -489,6 +504,14 @@ int fcTfunc()
 	for (int j = i + 1; j < wordSize; j++)
 	{
 		num += (int)(word[j] - 48) * pow(10, i - j);
+	}
+	for (int i = 0; i < fcTline; i++)
+	{
+		if (num == fcTable[i])
+		{
+			getNext(FCTYPE, i);
+			return 1;
+		}
 	}
 	new_fcTableItem(num);
 	getNext(FCTYPE, fcTline - 1);
@@ -521,24 +544,22 @@ TOKEN getNext(TOKENTYPE type , int id)
 	TOKEN token_next;
 	token_next.id = id;
 	token_next.type = type;
-	tokenFinal[tokenSize] = token_next;
-	tokenSize++;
+	sign = token_next;
 	return token_next;
 }
 
 //读取下一个符号的Token项，参数：单词类型，单词编号
 TOKEN Next()
 {
-	tokenPos++;
-	return tokenFinal[tokenPos-1];
+	sign.type = -1;
+	while (sign.type == -1)
+	{
+		pre_State = ToNext(pre_State, srcfile);
+		if (pre_State = 12)
+		{
+			sign.type = NOTYPE;
+			sign.id = 0;
+		}
+	}
+	return sign;
 }
-
-//词法分析器调用，参数：文件指针
-int LexicalAnalyser(FILE* fp)
-{
-	initWord();
-	int State = 0;
-	ToNext(State, fp);
-
-}
-
