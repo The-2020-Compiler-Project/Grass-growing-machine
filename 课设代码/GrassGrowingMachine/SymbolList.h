@@ -7,7 +7,7 @@
 #define DEST_INT_SIZE 2 //目标代码INT类型所占字节数
 #define DEST_CHAR_SIZE 2 //目标代码CHAR类型所占字节数
 #define DEST_REAL_SIZE 4 //目标代码REAL类型所占字节数
-#define DEST_PTR_SIZE 2 //目标代码指针类型（地址）所占字节数
+#define DEST_PTR_SIZE 4 //目标代码指针类型（地址）所占字节数(段地址+偏移地址)
 
 typedef enum OPR //四元式操作符
 {
@@ -139,3 +139,25 @@ typedef struct MIDVLITEM //中间（临时）变量表项
 
 int MidvlLine; //当前已占用的行数，也就是说有效数据的范围为MIDVL[0~MidvlLine-1]
 MIDVLITEM MIDVL[MAX_SYMBLISTSIZE]; //中间（临时）变量表，在表达式求值中使用
+
+typedef struct AINFL//数组信息表（每个数组一张，使用时malloc）
+{
+	int low; //数组的下界
+	int up; //数组的上界
+	TYPELITEM CTP; //数组成分类型指针
+	int CLEN; //单个成分所占字长
+} AINFL;
+
+struct RINFLITEM //结构表表项
+{
+	char ID[MAX_IDLEN]; //域名
+	int OFF; //区距
+	TYPELITEM TP; //类型
+};
+
+typedef struct RINFL //结构表,每个结构一份，使用时malloc
+{
+	int RInflLine; //该表当前已占用的行数，从1数起
+	int totalsize; //该结构的总字长
+	struct RINFLITEM CLIST[MAX_SYMBLISTSIZE]; //成员列表
+} RINFL;
