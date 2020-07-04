@@ -3,6 +3,7 @@
 #include "Tables.h"
 #include "SymbolList.h"
 #include "LexicalAnalyser.h"
+#include "GrammarAnalyser.h"
 
 const int DEBUG = 1;
 
@@ -39,6 +40,7 @@ int main(char argc, char* argv[])
     //此处以后可以进行文件的读取操作测试等
 
     LexicalAnalyser(srcfile);
+    GrammarAnalyse();
 
     return 0;
 }

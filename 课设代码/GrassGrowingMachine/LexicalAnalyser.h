@@ -36,18 +36,6 @@ typedef struct TOKEN
 	int id; //编号
 }TOKEN;
 
-//关键字表
-char* KT[18] = { "int" , "char" , "real" , "program" , "function" , "var" , "args" , "val" ,
-				 "ptr" , "body" , "return" , "if" , "else" , "while" , "endp" , "putc" , "and" , "or" };
-//关键字表的长度
-int KTSize = 18;
-
-//界符表
-char* PT[17] = { "<=" , ">=" , "==" , "=" , "<" , ">" , "!=" , "+" , "-" , "*" , "/" , "%" , "{" ,
-				 "}" , "(" , ")"  , ";"};
-//界符表的长度
-int PTSize = 17;
-
 //生成的Token序列
 TOKEN tokenFinal[10000];
 //Token序列的长度

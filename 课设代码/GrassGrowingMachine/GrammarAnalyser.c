@@ -155,7 +155,7 @@ int exprGenerateSeq(OPR op, int argnum)
 		exprProcessedType exprmidvar; //生成的中间变量的表达式项，用于栈
 		exprmidvar.type = exprID;
 		exprmidvar.datatype = expr_arg1.datatype;
-		if (op != AND && op != OR)
+		if (op != AND && op != OR && op != GT && op != GE && op != LT && op != LE && op != EQ && op != NE)
 		{
 			gotten_midvarname = allocMidVar(expr_arg1.datatype);
 			if (!gotten_midvarname)
@@ -339,7 +339,7 @@ TOKEN gDeclVars(TOKEN preTOKEN)
 	{
 		passTOKEN = gVarDef(passTOKEN);
 	}
-	SEQUENCE seq2 = { GE, {seqNONE, 0, false}, {seqNONE, 0, false}, {seqNONE, 0, false} };
+	SEQUENCE seq2 = { GVE, {seqNONE, 0, false}, {seqNONE, 0, false}, {seqNONE, 0, false} };
 	sendSequence(seq2);
 	passTOKEN = Next();
 	return passTOKEN;
@@ -451,7 +451,7 @@ TOKEN gFuncDef(TOKEN preTOKEN)
 	strcpy(SYMBL[SymblLine].name, funcname);
 	SYMBL[SymblLine].cat = fCAT;
 	SYMBL[SymblLine].addr = &PFINFL[PFInflLine]; //此时该函数尚未填至PFINFL表
-	SYMBL[SymblLine].OFFSET = &(PFINFL[PFInflLine].OFFSET); //函数此项为指向函数信息表中的区距的指针
+	int curFuncSymblLine = SymblLine; //便于回填区距
 	//提前填写函数信息表中的区距，方便后续填写参数区距 
 	int funcsize; //返回值占用空间
 	switch (functype)
@@ -481,6 +481,7 @@ TOKEN gFuncDef(TOKEN preTOKEN)
 	//生成四元式
 	SEQUENCE seq = { FUNC, {seqID, iTable[funcnameid], true}, {seqNONE, 0, false}, {seqNONE, 0, false} };
 	sendSequence(seq);
+	++SymblLine;
 	passTOKEN = Next();
 	passTOKEN = gDeclArgs(passTOKEN);
 	passTOKEN = gDeclFuncVars(passTOKEN);
@@ -494,8 +495,8 @@ TOKEN gFuncDef(TOKEN preTOKEN)
 	PFINFL[PFInflLine].FN = iArgNum;
 	PFINFL[PFInflLine].ENTRY = 0;
 	PFINFL[PFInflLine].PARAM = ptrFirstArg;
+	SYMBL[curFuncSymblLine].OFFSET = PFINFL[PFInflLine].OFFSET; //回填区距
 	++PFInflLine;
-	++SymblLine;
 	//生成四元式
 	SEQUENCE seq2 = { EF, {seqNONE, 0, false}, {seqNONE, 0, false}, {seqNONE, 0, false} };
 	sendSequence(seq2);
@@ -683,7 +684,7 @@ TOKEN gFuncVarDef(TOKEN preTOKEN)
 		ARGL[ArglLine].cat = vfCAT;
 		ARGL[ArglLine].OFFSET = SYMBL[SymblLine].OFFSET;
 		ARGL[ArglLine].type = SYMBL[SymblLine].type;
-		if (ptrFirstArg != NULL)
+		if (ptrFirstArg == NULL)
 		{
 			ptrFirstArg = &ARGL[ArglLine];
 		}
@@ -696,7 +697,7 @@ TOKEN gFuncVarDef(TOKEN preTOKEN)
 		ARGL[ArglLine].cat = vnCAT;
 		ARGL[ArglLine].OFFSET = SYMBL[SymblLine].OFFSET;
 		ARGL[ArglLine].type = SYMBL[SymblLine].type;
-		if (ptrFirstArg != NULL)
+		if (ptrFirstArg == NULL)
 		{
 			ptrFirstArg = &ARGL[ArglLine];
 		}
@@ -897,9 +898,16 @@ TOKEN gCodeAssign(TOKEN preTOKEN)
 			{
 				//error 返回值类型不对应
 			}
+			char *midvarname = allocMidVar(SYMBL[func_symblID].type);
+			if (midvarname == NULL)
+			{
+				//栈空间申请错误
+			}
 			//生成函数调用四元式
-			SEQUENCE seq = { CALL, {seqID, iTable[iNameIdToCheck], true}, {seqNONE, 0, false}, {seqID, iTable[dest_varnameid], true} };
+			SEQUENCE seq = { CALL, {seqID, iTable[iNameIdToCheck], true}, {seqNONE, 0, false}, {seqID, midvarname, true} };
 			sendSequence(seq);
+			SEQUENCE seq2 = { ASSI, {seqID, midvarname, true}, {seqNONE, 0, false}, {seqID, iTable[dest_varnameid], true} };
+			sendSequence(seq2);
 		}
 		else
 		{
@@ -941,6 +949,7 @@ TOKEN gCodePrint(TOKEN preTOKEN)
 	{
 		//error
 	}
+	passTOKEN = Next();
 	passTOKEN = gExpr(passTOKEN);
 	SEQUENCE seq = { PUTC, {seqNONE, 0, true}, {seqNONE, 0, false}, {seqNONE, 0, false} };
 	fillExprSeqArg(&seq.arg1);
@@ -1128,11 +1137,6 @@ TOKEN gCodeCall(TOKEN preTOKEN)
 		passTOKEN = Next();
 	}
 	passTOKEN = Next();
-	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pSEMI))
-	{
-		//error
-	}
-	passTOKEN = Next();
 	return passTOKEN;
 }
 
@@ -1240,7 +1244,7 @@ TOKEN gRelationSuffix(TOKEN preTOKEN)
 	passTOKEN = Next();
 	passTOKEN = gMathExpr(passTOKEN);
 	exprGenerateSeq(op, 2);
-	passTOKEN = gRelationExpr(passTOKEN);
+	passTOKEN = gRelationSuffix(passTOKEN);
 	return passTOKEN;
 }
 

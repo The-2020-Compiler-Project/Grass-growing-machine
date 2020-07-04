@@ -1,6 +1,18 @@
 #include "LexicalAnalyser.h"
 #include <windows.h>
 
+//关键字表
+char* KT[18] = { "int" , "char" , "real" , "program" , "function" , "var" , "args" , "val" ,
+				 "ptr" , "body" , "return" , "if" , "else" , "while" , "endp" , "putc" , "and" , "or" };
+//关键字表的长度
+int KTSize = 18;
+
+//界符表
+char* PT[17] = { "<=" , ">=" , "==" , "=" , "<" , ">" , "!=" , "+" , "-" , "*" , "/" , "%" , "{" ,
+				 "}" , "(" , ")"  , ";" };
+//界符表的长度
+int PTSize = 17;
+
 //初始化当前单词和单词的大小
 int initWord()
 {
@@ -517,7 +529,7 @@ TOKEN getNext(TOKENTYPE type , int id)
 TOKEN Next()
 {
 	tokenPos++;
-	return tokenFinal[tokenPos];
+	return tokenFinal[tokenPos-1];
 }
 
 //词法分析器调用，参数：文件指针
