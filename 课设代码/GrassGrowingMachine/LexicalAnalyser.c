@@ -160,7 +160,7 @@ int next1(char nextChar)
 	if (nextChar == '#')
 	{
 		wordPop();
-		KTfunc(word);
+		KTfunc();
 		initWord();
 		nextState = 10;
 	}
@@ -171,14 +171,14 @@ int next1(char nextChar)
 	else if (nextChar == ' ' || nextChar == '\n' || nextChar == '\t')
 	{
 		wordPop();
-		KTfunc(word);
+		KTfunc();
 		initWord();
 		nextState = 0;
 	}
 	else
 	{
 		wordPop();
-		KTfunc(word);
+		KTfunc();
 		initWord();
 		word[0] = nextChar;
 		wordSize++;
@@ -202,7 +202,7 @@ int next2(char nextChar)
 	else
 	{
 		wordPop();
-		dcTfunc(word);
+		dcTfunc();
 		initWord();
 		word[0] = nextChar;
 		wordSize++;
@@ -217,7 +217,7 @@ int next3(char nextChar)
 	int nextState = 0;
 	if (nextChar == '\'')
 	{
-		cTfunc(word);
+		cTfunc();
 		initWord();
 		nextState = 0;
 	}
@@ -239,7 +239,7 @@ int next4(char nextChar)
 	int nextState = 0;
 	if (nextChar == '"')
 	{
-		sTfunc(word);
+		sTfunc();
 		initWord();
 		nextState = 0;
 	}
@@ -262,20 +262,20 @@ int next5(char nextChar)
 	if (nextChar == '#')
 	{
 		wordPop();
-		PTfunc(word);
+		PTfunc();
 		nextState = 10;
 	}
 	if (nextChar == ' ' || nextChar == '\n')
 	{
 		wordPop();
-		PTfunc(word);
+		PTfunc();
 		initWord();
 		nextState = 0;
 	}
 	else if ((nextChar >= '0' && nextChar <= '9'))
 	{
 		wordPop();
-		PTfunc(word);
+		PTfunc();
 		initWord();
 		word[0] = nextChar;
 		wordSize++;
@@ -284,7 +284,7 @@ int next5(char nextChar)
 	else if ((nextChar >= 'a' && nextChar <= 'z') || (nextChar >= 'A' && nextChar <= 'Z') || nextChar == '_')
 	{
 		wordPop();
-		PTfunc(word);
+		PTfunc();
 		initWord();
 		word[0] = nextChar;
 		wordSize++;
@@ -293,7 +293,7 @@ int next5(char nextChar)
 	else if (nextChar == '\'')
 	{
 		wordPop();
-		PTfunc(word);
+		PTfunc();
 		initWord();
 		word[0] = nextChar;
 		wordSize++;
@@ -302,7 +302,7 @@ int next5(char nextChar)
 	else if (nextChar == '"')
 	{
 		wordPop();
-		PTfunc(word);
+		PTfunc();
 		initWord();
 		word[0] = nextChar;
 		wordSize++;
@@ -311,11 +311,11 @@ int next5(char nextChar)
 	else if (nextChar == '}' || nextChar == ')' || nextChar == '{' || nextChar == '(')
 	{
 		wordPop();
-		PTfunc(word);
+		PTfunc();
 		initWord();
 		word[0] = nextChar;
 		wordSize++;
-		PTfunc(word);
+		PTfunc();
 		initWord();
 		nextState = 0;
 	}
@@ -336,7 +336,7 @@ int next6(char nextChar)
 	else if ((nextChar == '(') || (nextChar == '{') || (nextChar == ')') || (nextChar == '}') || (nextChar == ';'))
 	{
 		wordPop();
-		fcTfunc(word);
+		fcTfunc();
 		initWord();
 		word[0] = nextChar;
 		wordSize++;
@@ -344,7 +344,7 @@ int next6(char nextChar)
 	}
 	else
 	{
-		fcTfunc(word);
+		fcTfunc();
 		initWord();
 		nextState = 0;
 	}
@@ -410,7 +410,7 @@ int KTfunc()
 			j++;
 		}
 	}
-	iTfunc(word);
+	iTfunc();
 }
 
 //查询当前单词是否是已有标识符，是则生成对应Token项，否则将其填入标识符表再输出对应的Token序列
@@ -483,7 +483,7 @@ int fcTfunc()
 }
 
 //查询当前单词是否在界符表中，是则生成对应Token序列，否则输出错误信息
-int PTfunc(char* word)
+int PTfunc()
 {
 	wordSize++;
 	for (int i = 0; i < PTSize; i++)
