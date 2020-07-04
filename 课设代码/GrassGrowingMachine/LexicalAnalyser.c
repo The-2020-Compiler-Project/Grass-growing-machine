@@ -16,7 +16,7 @@ int PTSize = 17;
 //初始化当前单词和单词的大小
 int initWord()
 {
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < MAX_IDLEN; i++)
 	{
 		word[i] = '\0';
 	}
@@ -433,6 +433,7 @@ int iTfunc()
 		int j = 0;
 		while (word[j] == iTable[i][j])
 		{
+			int size = sizeof(word);
 			if (j == sizeof(word) - 1)
 			{
 				getNext(ITYPE, i);
@@ -540,3 +541,4 @@ int LexicalAnalyser(FILE* fp)
 	ToNext(State, fp);
 
 }
+

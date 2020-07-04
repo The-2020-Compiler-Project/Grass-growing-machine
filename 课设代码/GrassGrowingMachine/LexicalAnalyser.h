@@ -44,7 +44,7 @@ int tokenSize;
 int tokenPos;
 
 //当前单词
-char word[100];
+char word[MAX_IDLEN];
 //当前单词大小
 int wordSize;
 //初始化当前单词和单词的大小，成功则返回1
