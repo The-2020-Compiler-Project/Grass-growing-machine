@@ -43,7 +43,7 @@ int wordSize;
 //读到的下一个符号
 TOKEN sign;
 //自动机当前状态
-int pre_State = 0;
+int pre_State;
 //初始化当前单词和单词的大小，成功则返回1
 int initWord();
 //弹出word的最后一位字符，成功则返回1

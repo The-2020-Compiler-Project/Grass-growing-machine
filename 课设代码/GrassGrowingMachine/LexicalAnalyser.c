@@ -1,6 +1,9 @@
 #include "LexicalAnalyser.h"
 #include <windows.h>
 
+//自动机当前状态
+pre_State = 0;
+
 //关键字表
 char* KT[18] = { "int" , "char" , "real" , "program" , "function" , "var" , "args" , "val" ,
 				 "ptr" , "body" , "return" , "if" , "else" , "while" , "endp" , "putc" , "and" , "or" };
@@ -94,11 +97,10 @@ int transition(int lastState, char nextChar)
 int ToNext(int pastState, FILE* fp)
 {
 	int nextState = 0;
-	int nextChar;
+	int nextChar = ' ';
 
 	if ((nextChar = fgetc(fp)) != EOF)
 	{
-		nextChar = (char)nextChar;
 		word[wordSize] = nextChar;
 		wordSize++;
 	}
@@ -106,7 +108,7 @@ int ToNext(int pastState, FILE* fp)
 	{
 		PTfunc();
 		printf("LexicalAnalyse Completed!\n");
-		return 12;
+		return 1;
 	}
 
 	nextState = transition(pastState, nextChar);
@@ -388,6 +390,7 @@ int next10(char nextChar)
 	}
 	else
 	{
+		initWord();
 		nextState = 10;
 	}
 	return nextState;
@@ -551,15 +554,14 @@ TOKEN getNext(TOKENTYPE type , int id)
 //读取下一个符号的Token项，参数：单词类型，单词编号
 TOKEN Next()
 {
-	sign.type = -1;
-	while (sign.type == -1)
+	sign.type = 0;
+	if (!feof(srcfile))
+	{
+		sign.id = 0;
+	}
+	while (sign.type == 0)
 	{
 		pre_State = ToNext(pre_State, srcfile);
-		if (pre_State = 12)
-		{
-			sign.type = NOTYPE;
-			sign.id = 0;
-		}
 	}
 	return sign;
 }
