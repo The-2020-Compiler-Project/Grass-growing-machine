@@ -40,6 +40,10 @@ typedef struct TOKEN
 char word[MAX_IDLEN];
 //当前单词大小
 int wordSize;
+//当前所在的字符
+int nextChar;
+//自动机下一状态
+int nextState;
 //读到的下一个符号
 TOKEN sign;
 //自动机当前状态
@@ -76,6 +80,18 @@ int next8(char nextChar);
 int next9(char nextChar);
 //确定当前状态为10时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
 int next10(char nextChar);
+//确定当前状态为13时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next13(char nextChar);
+//确定当前状态为14时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next14(char nextChar);
+//确定当前状态为15时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next15(char nextChar);
+//确定当前状态为16时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next16(char nextChar);
+//确定当前状态为17时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next17(char nextChar);
+//确定当前状态为18时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next18(char nextChar);
 
 //查询当前单词是否为关键字，是则生成对应Token项，否则运行标识符处理函数，成功时返回1
 int KTfunc();

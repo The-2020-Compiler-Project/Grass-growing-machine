@@ -3,6 +3,8 @@
 
 //自动机当前状态
 pre_State = 0;
+//自动机下一状态
+nextState = 0;
 
 //关键字表
 char* KT[18] = { "int" , "char" , "real" , "program" , "function" , "var" , "args" , "val" ,
@@ -42,7 +44,6 @@ int wordPop()
 //确定自动机下一状态，参数：前一状态，读到的下一个字符，返回自动机的下一状态码
 int transition(int lastState, char nextChar)
 {
-	int nextState = 0;
 	if (nextChar == '\0')
 	{
 		nextState = 11;
@@ -84,6 +85,24 @@ int transition(int lastState, char nextChar)
 		case(10):
 			nextState = next10(nextChar);
 			break;
+		case(13):
+			nextState = next13(nextChar);
+			break;
+		case(14):
+			nextState = next14(nextChar);
+			break;
+		case(15):
+			nextState = next15(nextChar);
+			break;
+		case(16):
+			nextState = next16(nextChar);
+			break;
+		case(17):
+			nextState = next17(nextChar);
+			break;
+		case(18):
+			nextState = next18(nextChar);
+			break;
 		default:
 			printf("Invalid input after %s" , word);
 			break;
@@ -96,19 +115,20 @@ int transition(int lastState, char nextChar)
 //自动机状态转换，参数：前一状态，要读取的文件指针，文件读到结尾时返回1
 int ToNext(int pastState, FILE* fp)
 {
-	int nextState = 0;
-	int nextChar = ' ';
-
-	if ((nextChar = fgetc(fp)) != EOF)
+	if(pastState <= 10)
 	{
-		word[wordSize] = nextChar;
-		wordSize++;
-	}
-	else
-	{
-		PTfunc();
-		printf("LexicalAnalyse Completed!\n");
-		return 1;
+		if ((nextChar = fgetc(fp)) != EOF)
+		{
+			word[wordSize] = nextChar;
+			wordSize++;
+		}
+		else
+		{
+			sign.id = 9;
+			sign.type = 9;
+			printf("LexicalAnalyse Completed!\n");
+			return 12;
+		}
 	}
 
 	nextState = transition(pastState, nextChar);
@@ -118,8 +138,6 @@ int ToNext(int pastState, FILE* fp)
 //确定当前状态为0时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
 int next0(char nextChar)
 {
-	int nextState = 0;
-
 	if (nextChar == '\n' || nextChar == ' ' || nextChar == '\t')
 	{
 		initWord();
@@ -149,15 +167,12 @@ int next0(char nextChar)
 	{
 		nextState = 5;
 	}
-		
-
 	return nextState;
 }
 
 //确定当前状态为1时的下一个状态，参数：读到的下一个字符
 int next1(char nextChar)
 {
-	int nextState = 0;
 	if (nextChar == '#')
 	{
 		wordPop();
@@ -181,9 +196,7 @@ int next1(char nextChar)
 		wordPop();
 		KTfunc();
 		initWord();
-		word[0] = nextChar;
-		wordSize++;
-		nextState = 5;
+		nextState = 13;
 	}
 	return nextState;
 }
@@ -191,7 +204,6 @@ int next1(char nextChar)
 //确定当前状态为2时的下一个状态，参数：读到的下一个字符
 int next2(char nextChar)
 {
-	int nextState = 0;
 	if (nextChar == '.')
 	{
 		nextState = 6;
@@ -205,9 +217,7 @@ int next2(char nextChar)
 		wordPop();
 		dcTfunc();
 		initWord();
-		word[0] = nextChar;
-		wordSize++;
-		nextState = 5;
+		nextState = 13;
 	}
 	return nextState;
 }
@@ -215,7 +225,6 @@ int next2(char nextChar)
 //确定当前状态为3时的下一个状态，参数：读到的下一个字符
 int next3(char nextChar)
 {
-	int nextState = 0;
 	if (nextChar == '\'')
 	{
 		cTfunc();
@@ -237,7 +246,6 @@ int next3(char nextChar)
 //确定当前状态为4时的下一个状态，参数：读到的下一个字符
 int next4(char nextChar)
 {
-	int nextState = 0;
 	if (nextChar == '"')
 	{
 		sTfunc();
@@ -259,7 +267,6 @@ int next4(char nextChar)
 //确定当前状态为5时的下一个状态，参数：读到的下一个字符
 int next5(char nextChar)
 {
-	int nextState = 0;
 	if (nextChar == '#')
 	{
 		wordPop();
@@ -278,47 +285,35 @@ int next5(char nextChar)
 		wordPop();
 		PTfunc();
 		initWord();
-		word[0] = nextChar;
-		wordSize++;
-		nextState = 2;
+		nextState = 14;
 	}
 	else if ((nextChar >= 'a' && nextChar <= 'z') || (nextChar >= 'A' && nextChar <= 'Z') || nextChar == '_')
 	{
 		wordPop();
 		PTfunc();
 		initWord();
-		word[0] = nextChar;
-		wordSize++;
-		nextState = 1;
+		nextState = 15;
 	}
 	else if (nextChar == '\'')
 	{
 		wordPop();
 		PTfunc();
 		initWord();
-		word[0] = nextChar;
-		wordSize++;
-		nextState = 3;
+		nextState = 16;
 	}
 	else if (nextChar == '"')
 	{
 		wordPop();
 		PTfunc();
 		initWord();
-		word[0] = nextChar;
-		wordSize++;
-		nextState = 4;
+		nextState = 17;
 	}
 	else if (nextChar == '}' || nextChar == ')' || nextChar == '{' || nextChar == '(')
 	{
 		wordPop();
 		PTfunc();
 		initWord();
-		word[0] = nextChar;
-		wordSize++;
-		PTfunc();
-		initWord();
-		nextState = 0;
+		nextState = 18;
 	}
 	else
 	{
@@ -330,8 +325,6 @@ int next5(char nextChar)
 //确定当前状态为6时的下一个状态，参数：读到的下一个字符
 int next6(char nextChar)
 {
-	int nextState = 0;
-
 	if (nextChar >= '0' && nextChar <= '9')
 		nextState = 6;
 	else if ((nextChar == '(') || (nextChar == '{') || (nextChar == ')') || (nextChar == '}') || (nextChar == ';'))
@@ -339,9 +332,7 @@ int next6(char nextChar)
 		wordPop();
 		fcTfunc();
 		initWord();
-		word[0] = nextChar;
-		wordSize++;
-		nextState = 5;
+		nextState = 13;
 	}
 	else
 	{
@@ -355,7 +346,6 @@ int next6(char nextChar)
 //确定当前状态为7时的下一个状态，参数：读到的下一个字符
 int next7(char nextChar)
 {
-	int nextState = 0;
 	printf("Invalid Input after %s", word);
 	initWord();
 	return nextState;
@@ -364,7 +354,6 @@ int next7(char nextChar)
 //确定当前状态为8时的下一个状态，参数：读到的下一个字符
 int next8(char nextChar)
 {
-	int nextState = 0;
 	printf("Missing ' after %s", word);
 	initWord();
 	return nextState;
@@ -373,7 +362,6 @@ int next8(char nextChar)
 //确定当前状态为9时的下一个状态，参数：读到的下一个字符
 int next9(char nextChar)
 {
-	int nextState = 0;
 	printf("Missing \" after %s", word);
 	initWord();
 	return nextState;
@@ -382,7 +370,6 @@ int next9(char nextChar)
 //确定当前状态为10时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
 int next10(char nextChar)
 {
-	int nextState = 0;
 	if (nextChar == '\n')
 	{
 		initWord();
@@ -394,6 +381,56 @@ int next10(char nextChar)
 		nextState = 10;
 	}
 	return nextState;
+}
+
+//确定当前状态为13时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next13(char nextChar)
+{
+	word[wordSize] = nextChar;
+	wordSize++;
+	return nextState = 5;
+}
+
+//确定当前状态为14时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next14(char nextChar)
+{
+	word[wordSize] = nextChar;
+	wordSize++;
+	return nextState = 2;
+}
+
+//确定当前状态为15时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next15(char nextChar)
+{
+	word[wordSize] = nextChar;
+	wordSize++;
+	return nextState = 1;
+}
+
+//确定当前状态为16时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next16(char nextChar)
+{
+	word[wordSize] = nextChar;
+	wordSize++;
+	return nextState = 3;
+}
+
+//确定当前状态为17时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next17(char nextChar)
+{
+	word[wordSize] = nextChar;
+	wordSize++;
+	return nextState = 4;
+}
+
+//确定当前状态为18时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next18(char nextChar)
+{
+	word[wordSize] = nextChar;
+	wordSize++;
+	PTfunc();
+	initWord();
+	return nextState = 0;
 }
 
 //查询当前单词是否为关键字，是则生成对应Token项，否则运行标识符处理函数
@@ -420,15 +457,10 @@ int iTfunc()
 {
 	for (int i = 0; i < iTline; i++)
 	{
-		int j = 0;
-		while (word[j] == iTable[i][j])
+		if (!strcmp(word , iTable[i]))
 		{
-			if (j == sizeof(word) - 1)
-			{
-				getNext(ITYPE, i);
-				return 1;
-			}
-			j++;
+			getNext(ITYPE, i);
+			return 1;
 		}
 	}
 	new_iTableItem(word);
@@ -555,13 +587,16 @@ TOKEN getNext(TOKENTYPE type , int id)
 TOKEN Next()
 {
 	sign.type = 0;
-	if (!feof(srcfile))
-	{
-		sign.id = 0;
-	}
+	sign.id = 0;
 	while (sign.type == 0)
 	{
 		pre_State = ToNext(pre_State, srcfile);
+		if (pre_State == 12)
+		{
+			sign.type = 0;
+			sign.id = 0;
+			return sign;
+		}
 	}
 	return sign;
 }
