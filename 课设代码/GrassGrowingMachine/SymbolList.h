@@ -7,7 +7,8 @@
 #define DEST_INT_SIZE 2 //目标代码INT类型所占字节数
 #define DEST_CHAR_SIZE 2 //目标代码CHAR类型所占字节数
 #define DEST_REAL_SIZE 4 //目标代码REAL类型所占字节数
-#define DEST_PTR_SIZE 4 //目标代码指针类型（地址）所占字节数(段地址+偏移地址)
+#define DEST_PTR_SIZE 2 //目标代码指针类型（地址）所占字节数
+#define DEST_VN_SIZE 4 //目标代码换名形参所占字节数（段地址+偏移地址）
 
 typedef enum OPR //四元式操作符
 {
@@ -23,8 +24,8 @@ typedef enum OPR //四元式操作符
 
 typedef enum SEQARGTYPE
 {
-	//空，临时变量，标识符，整型常数，实型常数, 字符型常数
-	seqNONE, seqMIDVAR, seqID, seqDC, seqFC, seqCHAR
+	//空，标识符，整型常数，实型常数, 字符型常数
+	seqNONE, seqID, seqDC, seqFC, seqCHAR
 }SEQARGTYPE;
 
 typedef struct SEQARG //四元式参数
@@ -79,7 +80,7 @@ TYPELITEM TYPEL[MAX_SYMBLISTSIZE]; //类型表
 
 typedef enum SYMCAT //符号表中的种类项
 {
-	//函数，常量（预留），类型（预留），域名（预留），全局变量，换名形参，赋值形参，局部变量
+	//函数，常量（预留），类型（预留），全局变量，换名形参，赋值形参，局部变量
 	fCAT, cCAT, tCAT, gvCAT, vnCAT, vfCAT, svCAT
 }SYMCAT;
 
