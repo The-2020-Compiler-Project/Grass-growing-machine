@@ -9,6 +9,8 @@ int iWhileNum = 0; //目前的while语句个数
 int IF_SP = 0; //IF编号的栈指针
 int WHILE_SP = 0; //WHILE编号的栈指针
 char* buffptr = buff; //总是指向buff的结尾（\0）
+int totalFuncOffset = -1; //当前函数返回值+OLDBP+形参区所占的大小
+int currentFuncSize = -1; //当前函数返回值区大小
 
 int IF_Push(int id)
 {
@@ -27,16 +29,16 @@ int IF_Pop()
 
 int WHILE_Push(int id)
 {
-	if (IF_SP == MAX_SYMBLISTSIZE - 1) return 0;
-	IF_Stack[IF_SP] = id;
-	++IF_SP;
+	if (WHILE_SP == MAX_SYMBLISTSIZE - 1) return 0;
+	WHILE_Stack[WHILE_SP] = id;
+	++WHILE_SP;
 	return 1;
 }
 
 int WHILE_Pop()
 {
-	if (IF_SP == 0) return 0;
-	--IF_SP;
+	if (WHILE_SP == 0) return 0;
+	--WHILE_SP;
 	return 1;
 }
 
@@ -63,7 +65,7 @@ int Reg_ST()
 	{
 	case gvCAT:
 		buffptr += sprintf(buffptr, "\tMOV BX, %d\n", SYMBL[RDL_SYMBLID].OFFSET);
-		buffptr += sprintf(buffptr, "\tMOV [BX], AX\n", SYMBL[RDL_SYMBLID].OFFSET);
+		buffptr += sprintf(buffptr, "\tMOV [BX], AX\n");
 		RDL_SYMBLID = -1;
 		break;
 	case svCAT: 
@@ -74,7 +76,7 @@ int Reg_ST()
 	case vnCAT:
 		buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d]\n", SYMBL[RDL_SYMBLID].OFFSET+2);
 		buffptr += sprintf(buffptr, "\tMOV ES, BX\n");
-		buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 2]\n", SYMBL[RDL_SYMBLID].OFFSET+2);
+		buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 02H]\n", SYMBL[RDL_SYMBLID].OFFSET+2);
 		buffptr += sprintf(buffptr, "\tMOV ES:[BX], AX\n");
 		RDL_SYMBLID = -1;
 		break;
@@ -99,7 +101,7 @@ int Reg_LD(int symbl_id)
 	case vnCAT:
 		buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d]\n", SYMBL[symbl_id].OFFSET+2);
 		buffptr += sprintf(buffptr, "\tMOV ES, BX\n");
-		buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 2]\n", SYMBL[symbl_id].OFFSET+2);
+		buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 02H]\n", SYMBL[symbl_id].OFFSET+2);
 		buffptr += sprintf(buffptr, "\tMOV AX, ES:[BX]\n");
 		break;
 	default:
@@ -111,7 +113,7 @@ int Reg_LD(int symbl_id)
 int sub_VT(SEQUENCE Seq)
 {
 	if (!(Seq.op == VT)) return 0;
-	int get_id = Find_SymblItemName(0, Seq.arg1.content.str);
+	int get_id = getAvailableVar(Seq.arg1.content.str);
 	if (get_id == -1) return 0;
 	int size; //该数据所占字节数
 	if (SYMBL[get_id].type == TYPEL_INT)
@@ -174,7 +176,7 @@ int sub_ADD(SEQUENCE Seq)
 	}
 	else //arg1为标识符
 	{
-		int get_id = Find_SymblItemName(0, name_arg1); //arg1在SYMBL中的编号
+		int get_id = getAvailableVar(name_arg1); //arg1在SYMBL中的编号
 		if (get_id == -1) return 0;
 		if (RDL_SYMBLID != get_id)
 		{
@@ -211,7 +213,7 @@ int sub_ADD(SEQUENCE Seq)
 	}
 	else //arg2为标识符
 	{
-		int get_id = Find_SymblItemName(0, name_arg2); //arg2在SYMBL中的编号
+		int get_id = getAvailableVar(name_arg2); //arg2在SYMBL中的编号
 		if (get_id == -1) return 0;
 		switch (SYMBL[get_id].cat)
 		{
@@ -225,7 +227,7 @@ int sub_ADD(SEQUENCE Seq)
 		case vnCAT:
 			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV ES, BX\n");
-			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 2]\n", SYMBL[get_id].OFFSET+2);
+			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 02H]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tADD AX, ES:[BX]\n");
 			break;
 		default:
@@ -233,7 +235,7 @@ int sub_ADD(SEQUENCE Seq)
 		}
 	}
 	//置RDL_SYMBLID为目标
-	int target_id = Find_SymblItemName(0, Seq.target.content.str);
+	int target_id = getAvailableVar(Seq.target.content.str);
 	if (target_id == -1) return 0;
 	RDL_SYMBLID = target_id;
 	return 1;
@@ -270,7 +272,7 @@ int sub_SUB(SEQUENCE Seq)
 	}
 	else //arg1为标识符
 	{
-		int get_id = Find_SymblItemName(0, name_arg1); //arg1在SYMBL中的编号
+		int get_id = getAvailableVar(name_arg1); //arg1在SYMBL中的编号
 		if (get_id == -1) return 0;
 		if (RDL_SYMBLID != get_id)
 		{
@@ -306,7 +308,7 @@ int sub_SUB(SEQUENCE Seq)
 	}
 	else //arg2为标识符
 	{
-		int get_id = Find_SymblItemName(0, name_arg2); //arg2在SYMBL中的编号
+		int get_id = getAvailableVar(name_arg2); //arg2在SYMBL中的编号
 		if (get_id == -1) return 0;
 		switch (SYMBL[get_id].cat)
 		{
@@ -320,7 +322,7 @@ int sub_SUB(SEQUENCE Seq)
 		case vnCAT:
 			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV ES, BX\n");
-			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 2]\n", SYMBL[get_id].OFFSET+2);
+			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 02H]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tSUB AX, ES:[BX]\n");
 			break;
 		default:
@@ -328,7 +330,7 @@ int sub_SUB(SEQUENCE Seq)
 		}
 	}
 	//置RDL_SYMBLID为目标
-	int target_id = Find_SymblItemName(0, Seq.target.content.str);
+	int target_id = getAvailableVar(Seq.target.content.str);
 	if (target_id == -1) return 0;
 	RDL_SYMBLID = target_id;
 	return 1;
@@ -365,7 +367,7 @@ int sub_MUL(SEQUENCE Seq)
 	}
 	else //arg1为标识符
 	{
-		int get_id = Find_SymblItemName(0, name_arg1); //arg1在SYMBL中的编号
+		int get_id = getAvailableVar(name_arg1); //arg1在SYMBL中的编号
 		if (get_id == -1) return 0;
 		if (RDL_SYMBLID != get_id)
 		{
@@ -402,7 +404,7 @@ int sub_MUL(SEQUENCE Seq)
 	}
 	else //arg2为标识符
 	{
-		int get_id = Find_SymblItemName(0, name_arg2); //arg2在SYMBL中的编号
+		int get_id = getAvailableVar(name_arg2); //arg2在SYMBL中的编号
 		if (get_id == -1) return 0;
 		switch (SYMBL[get_id].cat)
 		{
@@ -418,7 +420,7 @@ int sub_MUL(SEQUENCE Seq)
 		case vnCAT:
 			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV ES, BX\n");
-			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 2]\n", SYMBL[get_id].OFFSET+2);
+			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 02H]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV DX, ES:[BX]\n");
 			buffptr += sprintf(buffptr, "\tIMUL DX\n");
 			break;
@@ -426,19 +428,16 @@ int sub_MUL(SEQUENCE Seq)
 			break;
 		}
 	}
-	//将DX最高位移至AX
-	buffptr += sprintf(buffptr, "\tAND DX, 80H\n");
-	buffptr += sprintf(buffptr, "\tOR AX, DX\n");
 	//置RDL_SYMBLID为目标
-	int target_id = Find_SymblItemName(0, Seq.target.content.str);
+	int target_id = getAvailableVar(Seq.target.content.str);
 	if (target_id == -1) return 0;
 	RDL_SYMBLID = target_id;
 	return 1;
 }
 
-int sub_DIV(SEQUENCE Seq, bool MOD)
+int sub_DIV(SEQUENCE Seq, bool isMOD)
 {
-	if (!(Seq.op == DIV)) return 0;
+	if (!(Seq.op == DIV || Seq.op == MOD)) return 0;
 	bool isArg1AnID = false; //参数1是否为标识符
 	int val_arg1; //若参数1是常数时的值
 	char name_arg1[MAX_IDLEN]; //若参数1是标识符时的名字
@@ -467,7 +466,7 @@ int sub_DIV(SEQUENCE Seq, bool MOD)
 	}
 	else //arg1为标识符
 	{
-		int get_id = Find_SymblItemName(0, name_arg1); //arg1在SYMBL中的编号
+		int get_id = getAvailableVar(name_arg1); //arg1在SYMBL中的编号
 		if (get_id == -1) return 0;
 		if (RDL_SYMBLID != get_id)
 		{
@@ -505,7 +504,7 @@ int sub_DIV(SEQUENCE Seq, bool MOD)
 	}
 	else //arg2为标识符
 	{
-		int get_id = Find_SymblItemName(0, name_arg2); //arg2在SYMBL中的编号
+		int get_id = getAvailableVar(name_arg2); //arg2在SYMBL中的编号
 		if (get_id == -1) return 0;
 		switch (SYMBL[get_id].cat)
 		{
@@ -523,7 +522,7 @@ int sub_DIV(SEQUENCE Seq, bool MOD)
 		case vnCAT:
 			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV ES, BX\n");
-			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 2]\n", SYMBL[get_id].OFFSET+2);
+			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 02H]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV BX, ES:[BX]\n");
 			buffptr += sprintf(buffptr, "\tCWD\n");
 			buffptr += sprintf(buffptr, "\tIDIV BX\n");
@@ -532,12 +531,12 @@ int sub_DIV(SEQUENCE Seq, bool MOD)
 			break;
 		}
 	}
-	if (MOD == true)
+	if (isMOD == true)
 	{
 		buffptr += sprintf(buffptr, "\tMOV AX, DX\n");
 	}
 	//置RDL_SYMBLID为目标
-	int target_id = Find_SymblItemName(0, Seq.target.content.str);
+	int target_id = getAvailableVar(Seq.target.content.str);
 	if (target_id == -1) return 0;
 	RDL_SYMBLID = target_id;
 	return 1;
@@ -574,7 +573,7 @@ int sub_ASSI(SEQUENCE Seq)
 	}
 	else //arg1为标识符
 	{
-		int get_id = Find_SymblItemName(0, name_arg1); //arg1在SYMBL中的编号
+		int get_id = getAvailableVar(name_arg1); //arg1在SYMBL中的编号
 		if (get_id == -1) return 0;
 		if (RDL_SYMBLID != get_id)
 		{
@@ -590,7 +589,7 @@ int sub_ASSI(SEQUENCE Seq)
 		}
 	}
 	//置RDL_SYMBLID为目标
-	int target_id = Find_SymblItemName(0, Seq.target.content.str);
+	int target_id = getAvailableVar(Seq.target.content.str);
 	if (target_id == -1) return 0;
 	RDL_SYMBLID = target_id;
 	return 1;
@@ -627,7 +626,7 @@ int sub_Relation(SEQUENCE Seq)
 	}
 	else //arg1为标识符
 	{
-		int get_id = Find_SymblItemName(0, name_arg1); //arg1在SYMBL中的编号
+		int get_id = getAvailableVar(name_arg1); //arg1在SYMBL中的编号
 		if (get_id == -1) return 0;
 		if (RDL_SYMBLID != get_id)
 		{
@@ -663,7 +662,7 @@ int sub_Relation(SEQUENCE Seq)
 	}
 	else //arg2为标识符
 	{
-		int get_id = Find_SymblItemName(0, name_arg2); //arg2在SYMBL中的编号
+		int get_id = getAvailableVar(name_arg2); //arg2在SYMBL中的编号
 		if (get_id == -1) return 0;
 		switch (SYMBL[get_id].cat)
 		{
@@ -677,7 +676,7 @@ int sub_Relation(SEQUENCE Seq)
 		case vnCAT:
 			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV ES, BX\n");
-			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 2]\n", SYMBL[get_id].OFFSET+2);
+			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 02H]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tSUB AX, ES:[BX]\n");
 			break;
 		default:
@@ -743,7 +742,7 @@ int sub_Relation(SEQUENCE Seq)
 		break;
 	}
 	//置RDL_SYMBLID为目标
-	int target_id = Find_SymblItemName(0, Seq.target.content.str);
+	int target_id = getAvailableVar(Seq.target.content.str);
 	if (target_id == -1) return 0;
 	RDL_SYMBLID = target_id;
 	return 1;
@@ -780,7 +779,7 @@ int sub_Logic(SEQUENCE Seq)
 	}
 	else //arg1为标识符
 	{
-		int get_id = Find_SymblItemName(0, name_arg1); //arg1在SYMBL中的编号
+		int get_id = getAvailableVar(name_arg1); //arg1在SYMBL中的编号
 		if (get_id == -1) return 0;
 		if (RDL_SYMBLID != get_id)
 		{
@@ -825,7 +824,7 @@ int sub_Logic(SEQUENCE Seq)
 	}
 	else //arg2为标识符
 	{
-		int get_id = Find_SymblItemName(0, name_arg2); //arg2在SYMBL中的编号
+		int get_id = getAvailableVar(name_arg2); //arg2在SYMBL中的编号
 		if (get_id == -1) return 0;
 		switch (SYMBL[get_id].cat)
 		{
@@ -839,7 +838,7 @@ int sub_Logic(SEQUENCE Seq)
 		case vnCAT:
 			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV ES, BX\n");
-			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 2]\n", SYMBL[get_id].OFFSET+2);
+			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 02H]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV DX, ES:[BX]\n");
 			break;
 		default:
@@ -867,7 +866,7 @@ int sub_Logic(SEQUENCE Seq)
 		break;
 	}
 	//置RDL_SYMBLID为目标
-	int target_id = Find_SymblItemName(0, Seq.target.content.str);
+	int target_id = getAvailableVar(Seq.target.content.str);
 	if (target_id == -1) return 0;
 	RDL_SYMBLID = target_id;
 	return 1;
@@ -886,6 +885,37 @@ int sub_PARAM(SEQUENCE Seq)
 	{
 		return 0;
 	}
+	if (iCurrentParamNum == 0)
+	{
+		buffptr += sprintf(buffptr, "\tMOV SI, SP\n"); //记录当前栈顶指针至SI
+		int argnum = ((PFINFLITEM*)SYMBL[func_symblID].addr)->FN;
+		ARGLITEM* lastarg = &((PFINFLITEM*)SYMBL[func_symblID].addr)->PARAM[argnum - 1];
+		int lastarg_size = 0;
+		switch (lastarg->cat)
+		{
+		case vfCAT:
+			if (lastarg->type == TYPEL_INT)
+			{
+				lastarg_size = DEST_INT_SIZE;
+			}
+			else if (lastarg->type == TYPEL_REAL)
+			{
+				lastarg_size = DEST_REAL_SIZE;
+			}
+			else if (lastarg->type == TYPEL_CHAR)
+			{
+				lastarg_size = DEST_CHAR_SIZE;
+			}
+			break;
+		case vnCAT:
+			lastarg_size = DEST_VN_SIZE;
+			break;
+		default:
+			break;
+		}
+		int FuncOffset = lastarg->OFFSET + lastarg_size;
+		buffptr += sprintf(buffptr, "\tLEA SP, [SI - %d]\n", FuncOffset);
+	}
 	switch (Seq.arg1.type)
 	{
 	case seqDC:
@@ -901,10 +931,6 @@ int sub_PARAM(SEQUENCE Seq)
 	default:
 		break;
 	}
-	if (iCurrentParamNum == 0)
-	{
-		buffptr += sprintf(buffptr, "\tMOV SI, SP\n"); //记录当前栈顶指针至SI
-	}
 	switch (func_paramlist[iCurrentParamNum].cat)
 	{
 	case vfCAT:
@@ -916,7 +942,7 @@ int sub_PARAM(SEQUENCE Seq)
 		}
 		else //arg1为标识符
 		{
-			int get_id = Find_SymblItemName(0, name_arg1); //arg1在SYMBL中的编号
+			int get_id = getAvailableVar(name_arg1); //arg1在SYMBL中的编号
 			if (get_id == -1) return 0;
 			if (RDL_SYMBLID != get_id)
 			{
@@ -931,7 +957,7 @@ int sub_PARAM(SEQUENCE Seq)
 				Reg_ST();
 			}
 		}
-		buffptr += sprintf(buffptr, "\tMOV SS:[SI + %d], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
+		buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
 		++iCurrentParamNum;
 	}
 		break;
@@ -943,7 +969,7 @@ int sub_PARAM(SEQUENCE Seq)
 		}
 		else //arg1为标识符
 		{
-			int get_id = Find_SymblItemName(0, name_arg1); //arg1在SYMBL中的编号
+			int get_id = getAvailableVar(name_arg1); //arg1在SYMBL中的编号
 			if (get_id == -1) return 0;
 			switch (SYMBL[get_id].cat)
 			{
@@ -952,20 +978,20 @@ int sub_PARAM(SEQUENCE Seq)
 				buffptr += sprintf(buffptr, "\tMOV AX, SS\n");
 				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
 				buffptr += sprintf(buffptr, "\tLEA AX, [BP - %d]\n", SYMBL[get_id].OFFSET + 2);
-				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d - 2], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
+				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d - 02H], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
 				break;
 			case gvCAT:
 				buffptr += sprintf(buffptr, "\tMOV AX, DS\n");
 				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
 				buffptr += sprintf(buffptr, "\tMOV BX, %d\n", SYMBL[get_id].OFFSET);
 				buffptr += sprintf(buffptr, "\tLEA AX, [BX]\n");
-				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d - 2], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
+				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d - 02H], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
 				break;
 			case vnCAT:
 				buffptr += sprintf(buffptr, "\tMOV AX, [BP - %d]\n", SYMBL[get_id].OFFSET + 2);
 				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
-				buffptr += sprintf(buffptr, "\tMOV AX, [BP - %d - 2]\n", SYMBL[get_id].OFFSET + 2);
-				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d - 2], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
+				buffptr += sprintf(buffptr, "\tMOV AX, [BP - %d - 02H]\n", SYMBL[get_id].OFFSET + 2);
+				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d - 02H], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
 				break;
 			default:
 				break;
@@ -983,9 +1009,18 @@ int sub_PARAM(SEQUENCE Seq)
 int sub_CALL(SEQUENCE Seq)
 {
 	if (Seq.op != CALL) return 0;
-	buffptr += sprintf(buffptr, "\tMOV [SI-4], SI\n"); //OLD BP //默认函数返回值为单字
-	buffptr += sprintf(buffptr, "\tSUB SP, 4\n");
-	buffptr += sprintf(buffptr, "\tCALL %s\n", Seq.arg1.content.str);
+	if (RDL_SYMBLID != -1)
+	{
+		Reg_ST();
+	}
+	buffptr += sprintf(buffptr, "\tMOV SS:[SI-4], BP\n"); //OLD BP //默认函数返回值为单字
+	buffptr += sprintf(buffptr, "\tMOV BP, SI\n");
+	buffptr += sprintf(buffptr, "\tCALL FAR PTR %s\n", Seq.arg1.content.str);
+	buffptr += sprintf(buffptr, "\tPOP AX\n");
+	int get_targetid = getAvailableVar(Seq.target.content.str);
+	if (get_targetid == -1) return 0;
+	buffptr += sprintf(buffptr, "\tMOV DS:[%d], AX\n", SYMBL[get_targetid].OFFSET);
+	iCurrentParamNum = 0;
 	return 1;
 }
 
@@ -1017,7 +1052,7 @@ int sub_RET(SEQUENCE Seq)
 	}
 	else //arg1为标识符
 	{
-		int get_id = Find_SymblItemName(0, name_arg1); //arg1在SYMBL中的编号
+		int get_id = getAvailableVar(name_arg1); //arg1在SYMBL中的编号
 		if (get_id == -1) return 0;
 		if (RDL_SYMBLID != get_id)
 		{
@@ -1034,9 +1069,9 @@ int sub_RET(SEQUENCE Seq)
 	}
 	//将AX中的值放置到函数返回值存储区
 	buffptr += sprintf(buffptr, "\tMOV [BP - 2], AX\n");
-	buffptr += sprintf(buffptr, "\tLEA SP, [BP - 6]\n"); //将SP调整至OLDIP所在位置
+	buffptr += sprintf(buffptr, "\tLEA SP, [BP - %d]\n", totalFuncOffset + 2 * DEST_PTR_SIZE); //将SP调整至OLDCSIP所在位置
 	buffptr += sprintf(buffptr, "\tMOV BP, [BP - 4]\n"); //恢复BP
-	buffptr += sprintf(buffptr, "\tRET 2\n"); //函数返回，并将栈顶设置为函数返回值单元
+	buffptr += sprintf(buffptr, "\tRET %d\n", totalFuncOffset - currentFuncSize); //函数返回，并将栈顶设置为函数返回值单元
 	return 1;
 }
 
@@ -1044,7 +1079,6 @@ int sub_FUNC(SEQUENCE Seq)
 {
 	if (Seq.op != FUNC) return 0;
 	strcpy(strCurrentFuncName, Seq.arg1.content.str);
-	buffptr += sprintf(buffptr, "%s\tPROC\n", strCurrentFuncName); //子程序声明
 	int get_funcID = Find_SymblItemName(0, strCurrentFuncName);
 	if (get_funcID == -1) return 0;
 	int argnum = ((PFINFLITEM*)SYMBL[get_funcID].addr)->FN;
@@ -1072,8 +1106,21 @@ int sub_FUNC(SEQUENCE Seq)
 	default:
 		break;
 	}
-	int totalOffset = lastarg->OFFSET + lastarg_size;
-	buffptr += sprintf(buffptr, "\tLEA SP, [BP - %d]\n", totalOffset);
+	if (SYMBL[get_funcID].type == TYPEL_INT)
+	{
+		currentFuncSize = DEST_INT_SIZE;
+	}
+	else if (SYMBL[get_funcID].type == TYPEL_REAL)
+	{
+		currentFuncSize = DEST_REAL_SIZE;
+	}
+	else if (SYMBL[get_funcID].type == TYPEL_CHAR)
+	{
+		currentFuncSize = DEST_CHAR_SIZE;
+	}
+	totalFuncOffset = lastarg->OFFSET + lastarg_size;
+	currentFunc = (PFINFLITEM*)SYMBL[get_funcID].addr;
+	buffptr += sprintf(buffptr, "%s\tPROC FAR\n", strCurrentFuncName); //子程序声明
 	return 1;
 }
 
@@ -1082,6 +1129,10 @@ int sub_EF(SEQUENCE Seq)
 	if (Seq.op != EF) return 0;
 	buffptr += sprintf(buffptr, "%s\tENDP\n", strCurrentFuncName);
 	strcpy(strCurrentFuncName, "\0");
+	//currentFunc置空
+	currentFunc = NULL;
+	currentFuncSize = -1;
+	totalFuncOffset = -1;
 	return 1;
 }
 
@@ -1091,9 +1142,6 @@ int sub_IF(SEQUENCE Seq)
 	bool isArg1AnID = false; //参数1是否为标识符
 	int val_arg1; //若参数1是常数时的值
 	char name_arg1[MAX_IDLEN]; //若参数1是标识符时的名字
-	IF_Push(iIfNum);
-	++iIfNum;
-	buffptr += sprintf(buffptr, "_IF%d:", IF_Stack[IF_SP - 1]); //IF_Stack[IF_SP-1]为栈顶元素
 	switch (Seq.arg1.type)
 	{
 	case seqDC:
@@ -1116,7 +1164,7 @@ int sub_IF(SEQUENCE Seq)
 	}
 	else //arg1为标识符
 	{
-		int get_id = Find_SymblItemName(0, name_arg1); //arg1在SYMBL中的编号
+		int get_id = getAvailableVar(name_arg1); //arg1在SYMBL中的编号
 		if (get_id == -1) return 0;
 		if (RDL_SYMBLID != get_id)
 		{
@@ -1131,6 +1179,9 @@ int sub_IF(SEQUENCE Seq)
 			Reg_ST();
 		}
 	}
+	IF_Push(iIfNum);
+	++iIfNum;
+	buffptr += sprintf(buffptr, "_IF%d:", IF_Stack[IF_SP - 1]); //IF_Stack[IF_SP-1]为栈顶元素
 	buffptr += sprintf(buffptr, "\tTEST AX, AX\n");
 	buffptr += sprintf(buffptr, "\tJZ _EL%d\n", IF_Stack[IF_SP - 1]);
 	return 1;
@@ -1139,6 +1190,10 @@ int sub_IF(SEQUENCE Seq)
 int sub_EL(SEQUENCE Seq)
 {
 	if (Seq.op != EL) return 0;
+	if (RDL_SYMBLID != -1)
+	{
+		Reg_ST();
+	}
 	buffptr += sprintf(buffptr, "\tJMP _IE%d\n", IF_Stack[IF_SP - 1]);
 	buffptr += sprintf(buffptr, "_EL%d:", IF_Stack[IF_SP - 1]);
 	return 1;
@@ -1149,6 +1204,19 @@ int sub_IE(SEQUENCE Seq)
 	if (Seq.op != IE) return 0;
 	buffptr += sprintf(buffptr, "_IE%d:", IF_Stack[IF_SP - 1]);
 	IF_Pop();
+	return 1;
+}
+
+int sub_WH(SEQUENCE Seq)
+{
+	if (Seq.op != WH) return 0;
+	if (RDL_SYMBLID != -1)
+	{
+		Reg_ST();
+	}
+	WHILE_Push(iWhileNum);
+	++iWhileNum;
+	buffptr += sprintf(buffptr, "_WH%d:", WHILE_Stack[WHILE_SP - 1]);
 	return 1;
 }
 
@@ -1181,7 +1249,7 @@ int sub_DO(SEQUENCE Seq)
 	}
 	else //arg1为标识符
 	{
-		int get_id = Find_SymblItemName(0, name_arg1); //arg1在SYMBL中的编号
+		int get_id = getAvailableVar(name_arg1); //arg1在SYMBL中的编号
 		if (get_id == -1) return 0;
 		if (RDL_SYMBLID != get_id)
 		{
@@ -1204,6 +1272,11 @@ int sub_DO(SEQUENCE Seq)
 int sub_WE(SEQUENCE Seq)
 {
 	if (Seq.op != WE) return 0;
+	if (RDL_SYMBLID != -1)
+	{
+		Reg_ST();
+	}
+	buffptr += sprintf(buffptr, "\tJMP _WH%d\n", WHILE_Stack[WHILE_SP - 1]);
 	buffptr += sprintf(buffptr, "_WE%d:", WHILE_Stack[WHILE_SP - 1]);
 	return 1;
 }
@@ -1236,7 +1309,7 @@ int sub_PUTC(SEQUENCE Seq)
 	}
 	else //arg1为标识符
 	{
-		int get_id = Find_SymblItemName(0, name_arg1); //arg1在SYMBL中的编号
+		int get_id = getAvailableVar(name_arg1); //arg1在SYMBL中的编号
 		if (get_id == -1) return 0;
 		if (RDL_SYMBLID != get_id)
 		{
@@ -1354,9 +1427,7 @@ int SingleDestGenerate(SEQUENCE Seq)
 		sub_IE(Seq);
 		break;
 	case WH:
-		WHILE_Push(iWhileNum);
-		++iWhileNum;
-		buffptr += sprintf(buffptr, "_WH%d:", WHILE_Stack[WHILE_SP - 1]);
+		sub_WH(Seq);
 		break;
 	case DO:
 		sub_DO(Seq);
@@ -1370,4 +1441,5 @@ int SingleDestGenerate(SEQUENCE Seq)
 	default:
 		break;
 	}
+	return 1;
 }

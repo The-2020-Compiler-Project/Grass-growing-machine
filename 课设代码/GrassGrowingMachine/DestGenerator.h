@@ -42,7 +42,7 @@ int sub_SUB(SEQUENCE Seq);
 //处理乘法, Seq为对应四元式, 成功返回1，失败返回0
 int sub_MUL(SEQUENCE Seq);
 //处理除法, Seq为对应四元式, MOD为True时代表取余，成功返回1，失败返回0
-int sub_DIV(SEQUENCE Seq, bool MOD);
+int sub_DIV(SEQUENCE Seq, bool isMOD);
 //处理赋值, Seq为对应四元式，成功返回1，失败返回0
 int sub_ASSI(SEQUENCE Seq);
 //处理关系运算符, Seq为对应四元式，成功返回1，失败返回0
@@ -65,6 +65,8 @@ int sub_IF(SEQUENCE Seq);
 int sub_EL(SEQUENCE Seq);
 //处理IE, Seq为对应四元式，成功返回1，失败返回0
 int sub_IE(SEQUENCE Seq);
+//处理WH, Seq为对应四元式，成功返回1，失败返回0
+int sub_WHILE(SEQUENCE Seq);
 //处理DO, Seq为对应四元式，成功返回1，失败返回0
 int sub_DO(SEQUENCE Seq);
 //处理WE, Seq为对应四元式，成功返回1，失败返回0

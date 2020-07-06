@@ -476,7 +476,7 @@ TOKEN gFuncDef(TOKEN preTOKEN)
 		//error
 		break;
 	}
-	int funcoffset = funcsize + DEST_PTR_SIZE + DEST_PTR_SIZE; //sizeof(ret) + sizeof(OLD BP) + sizeof(OLD IP)
+	int funcoffset = funcsize + DEST_PTR_SIZE; //sizeof(ret) + sizeof(OLD BP)
 	PFINFL[PFInflLine].OFFSET = funcoffset;
 	iAvalFuncOffset = funcoffset;
 	//生成四元式
@@ -529,6 +529,7 @@ TOKEN gDeclArgs(TOKEN preTOKEN)
 	{
 		//error
 	}
+	iAvalFuncOffset += 2 * DEST_PTR_SIZE; //用于储存CS、IP
 	passTOKEN = Next();
 	return passTOKEN;
 }
