@@ -436,15 +436,10 @@ int KTfunc()
 {
 	for (int i = 0; i < KTSize; i++)
 	{
-		int j = 0;
-		while (word[j] == KT[i][j])
+		if (!strcmp(word ,KT[i]))
 		{
-			if (j == sizeof(KT[i]) - 1)
-			{
-				getNext(KTYPE, i);
-				return 1;
-			}
-			j++;
+			getNext(KTYPE, i);
+			return 1;
 		}
 	}
 	iTfunc();
@@ -487,15 +482,10 @@ int sTfunc()
 {
 	for (int i = 0; i < sTline; i++)
 	{
-		int j = 0;
-		while (word[j] == sTable[i][j])
+		if (!strcmp(word , sTable[i]))
 		{
-			if (j == sizeof(word) - 1)
-			{
-				getNext(STYPE, i);
-				return 1;
-			}
-			j++;
+			getNext(STYPE, i);
+			return 1;
 		}
 	}
 	new_sTableItem(word);
@@ -556,15 +546,10 @@ int PTfunc()
 {
 	for (int i = 0; i < PTSize; i++)
 	{
-		int j = 0;
-		while (word[j] == PT[i][j])
+		if (!strcmp(PT[i] , word))
 		{
-			if (j == wordSize - 1)
-			{
-				getNext(PTYPE, i);
-				return 1;
-			}
-			j++;
+			getNext(PTYPE, i);
+			return 1;
 		}
 	}
 	return 0;
