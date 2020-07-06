@@ -690,15 +690,14 @@ int sub_Relation(SEQUENCE Seq)
 	case GT:
 		//SF=0且ZF=0
 		buffptr += sprintf(buffptr, "\tLAHF\n");
+		buffptr += sprintf(buffptr, "\tMOV BX, AX\n"); 
 		buffptr += sprintf(buffptr, "\tAND AX, 8000H\n"); //取SF
 		buffptr += sprintf(buffptr, "\tXOR AH, 80H\n"); //置反
 		buffptr += sprintf(buffptr, "\tROL AX, 1\n"); //移至最低位
-		buffptr += sprintf(buffptr, "\tMOV BX, AX\n"); 
-		buffptr += sprintf(buffptr, "\tLAHF\n");
-		buffptr += sprintf(buffptr, "\tAND AX, 4000H\n"); //取ZF
-		buffptr += sprintf(buffptr, "\tXOR AH, 40H\n"); //置反
-		buffptr += sprintf(buffptr, "\tROL AX, 1\n"); 
-		buffptr += sprintf(buffptr, "\tROL AX, 1\n"); //循环左移两次移至最低位
+		buffptr += sprintf(buffptr, "\tAND BX, 4000H\n"); //取ZF
+		buffptr += sprintf(buffptr, "\tXOR BH, 40H\n"); //置反
+		buffptr += sprintf(buffptr, "\tROL BX, 1\n"); 
+		buffptr += sprintf(buffptr, "\tROL BX, 1\n"); //循环左移两次移至最低位
 		buffptr += sprintf(buffptr, "\tAND AX, BX\n"); //此时当条件成立时AX=1，否则AX=0
 		break;
 	case GE:
@@ -717,13 +716,12 @@ int sub_Relation(SEQUENCE Seq)
 	case LE:
 		//ZF=1或SF=1
 		buffptr += sprintf(buffptr, "\tLAHF\n");
+		buffptr += sprintf(buffptr, "\tMOV BX, AX\n");
 		buffptr += sprintf(buffptr, "\tAND AX, 8000H\n"); //取SF
 		buffptr += sprintf(buffptr, "\tROL AX, 1\n"); //移至最低位
-		buffptr += sprintf(buffptr, "\tMOV BX, AX\n");
-		buffptr += sprintf(buffptr, "\tLAHF\n");
-		buffptr += sprintf(buffptr, "\tAND AX, 4000H\n"); //取ZF
-		buffptr += sprintf(buffptr, "\tROL AX, 1\n");
-		buffptr += sprintf(buffptr, "\tROL AX, 1\n"); //循环左移两次移至最低位
+		buffptr += sprintf(buffptr, "\tAND BX, 4000H\n"); //取ZF
+		buffptr += sprintf(buffptr, "\tROL BX, 1\n");
+		buffptr += sprintf(buffptr, "\tROL BX, 1\n"); //循环左移两次移至最低位
 		buffptr += sprintf(buffptr, "\tOR AX, BX\n"); //此时当条件成立时AX=1，否则AX=0
 		break;
 	case EQ:
