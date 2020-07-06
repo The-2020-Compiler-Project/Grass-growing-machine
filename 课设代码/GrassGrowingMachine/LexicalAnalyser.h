@@ -36,27 +36,26 @@ typedef struct TOKEN
 	int id; //编号
 }TOKEN;
 
-//生成的Token序列
-TOKEN tokenFinal[10000];
-//Token序列的长度
-int tokenSize;
-//当前读到的Token序列位置
-int tokenPos;
-
 //当前单词
 char word[MAX_IDLEN];
 //当前单词大小
 int wordSize;
+//当前所在的字符
+int nextChar;
+//自动机下一状态
+int nextState;
+//读到的下一个符号
+TOKEN sign;
+//自动机当前状态
+int pre_State;
 //初始化当前单词和单词的大小，成功则返回1
 int initWord();
-//初始化Token序列数组，成功则返回1
-int initToken();
 //弹出word的最后一位字符，成功则返回1
 int wordPop();
 
-//确定自动机下一状态，参数：前一状态，读到的下一个字符，当前读到的单词的长度，当前读到的单词，返回自动机的下一状态码
-int transition(int preState, char nextChar, int wordSize, char* word);
-//自动机状态转换，参数：前一状态，要读取的文件指针，文件读到结尾时返回1
+//确定自动机下一状态，参数：前一状态，读到的下一个字符，返回自动机的下一状态码
+int transition(int preState, char nextChar);
+//自动机状态转换，参数：前一状态，要读取的文件指针
 int ToNext(int preState, FILE* fp);
 
 //确定当前状态为0时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
@@ -81,6 +80,18 @@ int next8(char nextChar);
 int next9(char nextChar);
 //确定当前状态为10时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
 int next10(char nextChar);
+//确定当前状态为13时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next13(char nextChar);
+//确定当前状态为14时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next14(char nextChar);
+//确定当前状态为15时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next15(char nextChar);
+//确定当前状态为16时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next16(char nextChar);
+//确定当前状态为17时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next17(char nextChar);
+//确定当前状态为18时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
+int next18(char nextChar);
 
 //查询当前单词是否为关键字，是则生成对应Token项，否则运行标识符处理函数，成功时返回1
 int KTfunc();
@@ -102,6 +113,3 @@ TOKEN getNext(TOKENTYPE type, int id);
 
 //读取下一个符号的Token项，参数：单词类型，单词编号
 TOKEN Next();
-
-//词法分析器调用，参数：文件指针
-int LexicalAnalyser(FILE* fp);

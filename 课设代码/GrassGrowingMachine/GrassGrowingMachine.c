@@ -46,9 +46,6 @@ int main(char argc, char* argv[])
     printf("文件读取成功!");
     //此处以后可以进行文件的读取操作测试等
 
-    LexicalAnalyser(srcfile);
-    tokenFinal[145].type = PTYPE;
-    tokenFinal[145].id = 13;
     GrammarAnalyse();
     DestGenerator(SequenceList, SeqLine, dstfile);
     return 0;

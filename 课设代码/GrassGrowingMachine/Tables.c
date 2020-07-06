@@ -61,7 +61,7 @@ int new_sTableItem(char* str)
 {
 	if (sTline < MAX_TABLELEN)
 	{
-		for (int i = 0; i < sizeof(str); i++)
+		for (int i = 0; i < 30; i++)
 		{
 			sTable[sTline][i] = str[i];
 			sTline++;
