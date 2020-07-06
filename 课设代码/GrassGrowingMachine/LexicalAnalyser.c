@@ -112,7 +112,7 @@ int transition(int lastState, char nextChar)
 	return nextState;
 }
 
-//自动机状态转换，参数：前一状态，要读取的文件指针，文件读到结尾时返回1
+//自动机状态转换，参数：前一状态，要读取的文件指针
 int ToNext(int pastState, FILE* fp)
 {
 	if(pastState <= 10)
@@ -124,8 +124,6 @@ int ToNext(int pastState, FILE* fp)
 		}
 		else
 		{
-			sign.id = 9;
-			sign.type = 9;
 			printf("LexicalAnalyse Completed!\n");
 			return 12;
 		}
@@ -556,7 +554,6 @@ int fcTfunc()
 //查询当前单词是否在界符表中，是则生成对应Token序列，否则输出错误信息
 int PTfunc()
 {
-	wordSize++;
 	for (int i = 0; i < PTSize; i++)
 	{
 		int j = 0;
@@ -591,7 +588,14 @@ TOKEN Next()
 	while (sign.type == 0)
 	{
 		pre_State = ToNext(pre_State, srcfile);
-		if (pre_State == 12)
+		if (pre_State == 12 && word[0] != '\0')
+		{
+			wordSize = 1;
+			PTfunc();
+			word[0] = '\0';
+			return sign;
+		}
+		else if (pre_State == 12)
 		{
 			sign.type = 0;
 			sign.id = 0;
