@@ -13,7 +13,7 @@ int init()
     srcfile = NULL;
     init_tables();
     init_symbl();
-    printf("Tables initialized!\n");
+    //printf("Tables initialized!\n");
     return 1;
 }
 
@@ -21,11 +21,6 @@ int main(char argc, char* argv[])
 {
     srcfile = NULL;
     FILE* dstfile = NULL; //输出的asm文件
-    printf("%d\n", argc);
-    for (int i = 0; i < argc; ++i)
-    {
-        printf("%s\n", argv[i]);
-    }
     if (!init())
     {
         printf("初始化失败！");
@@ -53,7 +48,14 @@ int main(char argc, char* argv[])
     printf("文件读取成功!");
     //此处以后可以进行文件的读取操作测试等
 
+    FILE* seqfile = fopen("Hello_Sequence.txt", "w");
+    if (!seqfile) return -1;
+    FILE* symfile = fopen("Hello_SYMBL.txt", "w");
+    if (!symfile) return -1;
+
     GrammarAnalyse();
+    Output_SeqList(SequenceList, SeqLine, seqfile);
+    Output_SYMBL(symfile);
     DestGenerator(SequenceList, SeqLine, dstfile);
     return 0;
  }

@@ -9,6 +9,9 @@
 #define DEST_REAL_SIZE 4 //目标代码REAL类型所占字节数
 #define DEST_PTR_SIZE 2 //目标代码指针类型（地址）所占字节数
 #define DEST_VN_SIZE 4 //目标代码换名形参所占字节数（段地址+偏移地址）
+#define TYPEL_INT &TYPEL[0]
+#define TYPEL_REAL &TYPEL[1]
+#define TYPEL_CHAR &TYPEL[2]
 
 typedef enum OPR //四元式操作符
 {
@@ -162,3 +165,12 @@ typedef struct RINFL //结构表,每个结构一份，使用时malloc
 	int totalsize; //该结构的总字长
 	struct RINFLITEM CLIST[MAX_SYMBLISTSIZE]; //成员列表
 } RINFL;
+
+//将SYMBL输出至文件，fp为目标文件，成功返回1，失败返回0
+int Output_SYMBL(FILE* fp);
+
+//将四元式列表输出至文件, SeqList为需要输出的四元式表格，SeqLine为四元式的数目（从1数起），fp为目标文件，成功返回1，失败返回0
+int Output_SeqList(SEQUENCE* SeqList, int SeqLine, FILE* fp);
+
+//将四元式操作符OPR以字符串形式输出至str，成功返回1，失败返回0
+int OPRtoStr(OPR op, char* str);

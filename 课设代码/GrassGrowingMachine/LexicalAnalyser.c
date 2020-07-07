@@ -124,7 +124,7 @@ int ToNext(int pastState, FILE* fp)
 		}
 		else
 		{
-			printf("LexicalAnalyse Completed!\n");
+			//printf("LexicalAnalyse Completed!\n");
 			return 12;
 		}
 	}
