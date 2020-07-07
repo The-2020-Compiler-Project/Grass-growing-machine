@@ -1,5 +1,81 @@
 # Grass-growing-machine
+
 A simple grammar compiler.
+
+## 当前进度
+
+* [x] 词法分析器设计
+* [x] 语法（语义）分析器设计
+* [x] 符号表设计
+* [x] 四元式生成
+* [ ] 四元式优化
+* [ ] 活跃信息生成
+* [x] 目标（8086汇编）代码生成
+
+------------------------------- 
+
+## Quick start
+
+`GrassGrowingMachine Hello.ggml Hello.asm`
+
+转至16位环境：
+
+`masm Hello.asm`
+
+`link Hello.obj`
+
+`Hello.exe`
+
+--------------------------------
+
+    #ggml:grass-growing-machine language （这是个单行注释）
+    program p1; #程序开始动作
+    var #先声明全局变量，便于函数访问
+    {
+        int a; int b; int c;
+        real f; char ch; #没有const
+    }
+    function #函数声明
+    {
+        int f1
+        {
+            args #参数定义
+            {
+                val{int a; char b;} #赋值形参
+                ptr{int pa;} #换名形参
+            }
+            var #临时变量定义
+            {
+                int tmp;
+            }
+            body #函数体
+            {
+                tmp = a * 2;
+                if (tmp <= 0)
+                {
+                    return 0;
+                }
+                else
+                {
+                    tmp = a+2;
+                    pa = 5;
+                    return tmp+2;
+                }
+                return 1;
+            }
+        }
+    }
+    body
+    {
+        a = 1;
+        b = 2;
+        c = 3;
+        a = a+b;
+        a = f1(a;b+1;c;);
+        putc(a+48;); #ascii
+        putc(c+48;); #ascii
+        endp; #程序结束动作
+    }
 
 ## 生草机语言（Grass-growing-machine language，ggml）
 
@@ -177,21 +253,19 @@ A simple grammar compiler.
 
 词法分析器 (LexicalAnalyser.c): Tables.c 
 
-语法/语义分析器 (GrammarAnalyser.c): LexicalAnalyser.c, Tables.c, Symbl.c
+语法/语义分析器 (GrammarAnalyser.c): LexicalAnalyser.c, Tables.c, SymblList.c
 
-符号表与四元式 (Symbl.c)
+符号表与四元式 (SymblList.c)
 
-优化 (Optimizer.c): Symbl.c
+优化 (Optimizer.c): SymblList.c
 
-目标代码生成 (DestGenerator.c): Symbl.c
+目标代码生成 (DestGenerator.c): SymblList.c
 
 --------------------------
 
 ## 对符号表的修改
 
 在符号表主表中，当CAT为vfCAT, vnCAT, svCAT时，addr指向其所属的函数。
-
-当在函数形参表中时，addr表示区距。函数形参表中需要添加局部变量项。
 
 --------------------------
 ## 已知问题
