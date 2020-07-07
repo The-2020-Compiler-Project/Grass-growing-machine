@@ -312,7 +312,7 @@ int next5(char nextChar)
 		initWord();
 		nextState = 17;
 	}
-	else if (nextChar == '}' || nextChar == ')' || nextChar == '{' || nextChar == '(' || nextChar == ';')
+	else if (nextChar == '}' || nextChar == ')' || nextChar == '{' || nextChar == '(')
 	{
 		wordPop();
 		PTfunc();
@@ -589,6 +589,7 @@ TOKEN Next()
 		if (pre_State == 12 && word[0] != '\0')
 		{
 			wordSize = 1;
+			word[1] = '\0';
 			PTfunc();
 			word[0] = '\0';
 			return sign;
