@@ -21,7 +21,7 @@ int PTSize = 17;
 //初始化当前单词和单词的大小
 int initWord()
 {
-	memset(word, MAX_IDLEN * sizeof(int), 0);
+	memset(word, MAX_IDLEN * sizeof(char), 0);
 	wordSize = 0;
 	return 1;
 }
@@ -79,11 +79,11 @@ int transition(int lastState, char nextChar)
 		case(8):
 			nextState = next8(nextChar);
 			break;
-		case(9):
-			nextState = next9(nextChar);
-			break;
 		case(10):
 			nextState = next10(nextChar);
+			break;
+		case(11):
+			exit(-1);
 			break;
 		case(13):
 			nextState = next13(nextChar);
@@ -104,8 +104,7 @@ int transition(int lastState, char nextChar)
 			nextState = next18(nextChar);
 			break;
 		default:
-			printf("Invalid input after %s" , word);
-			nextState = 12;
+			printf("The File has ended!\n");
 			break;
 		}
 	}
@@ -142,7 +141,7 @@ int next0(char nextChar)
 		initWord();
 		nextState = 0;
 	}
-	else if ((nextChar >= 'A' && nextChar <= 'Z') || (nextChar >= 'a' && nextChar <= 'z') || nextChar == '_')
+	else if ((nextChar >= 'A' && nextChar <= 'Z') || (nextChar >= 'a' && nextChar <= 'z'))
 	{
 		nextState = 1;
 	}
@@ -179,7 +178,7 @@ int next1(char nextChar)
 		initWord();
 		nextState = 10;
 	}
-	else if ((nextChar >= 'A' && nextChar <= 'Z') || (nextChar >= 'a' && nextChar <= 'z') || (nextChar >= '0' && nextChar <= '9') || nextChar == '_')
+	else if ((nextChar >= 'A' && nextChar <= 'Z') || (nextChar >= 'a' && nextChar <= 'z') || (nextChar >= '0' && nextChar <= '9'))
 	{
 		nextState = 1;
 	}
@@ -215,7 +214,19 @@ int next2(char nextChar)
 	{
 		printf("Expecting an number or an specific identifier after %s\n", word);
 		initWord();
-		nextState = 12;
+		exit(-1);
+	}
+	else if (nextChar == '#')
+	{
+		printf("Expecting ';' after %s", word);
+		exit(-1);
+	}
+	else if (nextChar == ' ' || nextChar == '\n' || nextChar == '\t')
+	{
+		wordPop();
+		dcTfunc();
+		initWord();
+		nextState = 0;
 	}
 	else
 	{
@@ -230,16 +241,11 @@ int next2(char nextChar)
 //确定当前状态为3时的下一个状态，参数：读到的下一个字符
 int next3(char nextChar)
 {
-	if (nextChar == '\'')
+	if (nextChar == '\n')
 	{
-		cTfunc();
+		printf("Missing ' after %s\n", word);
 		initWord();
-		nextState = 0;
-	}
-	else if (nextChar == '\n')
-	{
-		wordPop();
-		nextState = 8;
+		exit(-1);
 	}
 	else
 	{
@@ -259,8 +265,9 @@ int next4(char nextChar)
 	}
 	else if (nextChar == '\n')
 	{
-		wordPop();
-		nextState = 9;
+		printf("Missing \" after %s\n", word);
+		initWord();
+		exit(-1);
 	}
 	else
 	{
@@ -278,7 +285,7 @@ int next5(char nextChar)
 		PTfunc();
 		nextState = 10;
 	}
-	if (nextChar == ' ' || nextChar == '\n')
+	if (nextChar == ' ' || nextChar == '\n' || nextChar == '\t')
 	{
 		wordPop();
 		PTfunc();
@@ -292,7 +299,7 @@ int next5(char nextChar)
 		initWord();
 		nextState = 14;
 	}
-	else if ((nextChar >= 'a' && nextChar <= 'z') || (nextChar >= 'A' && nextChar <= 'Z') || nextChar == '_')
+	else if ((nextChar >= 'a' && nextChar <= 'z') || (nextChar >= 'A' && nextChar <= 'Z'))
 	{
 		wordPop();
 		PTfunc();
@@ -313,7 +320,7 @@ int next5(char nextChar)
 		initWord();
 		nextState = 17;
 	}
-	else if (nextChar == '}' || nextChar == ')' || nextChar == '{' || nextChar == '(')
+	else if (nextChar == '}' || nextChar == ')' || nextChar == '{' || nextChar == '(' || nextChar == ';')
 	{
 		wordPop();
 		PTfunc();
@@ -332,24 +339,30 @@ int next6(char nextChar)
 {
 	if (nextChar >= '0' && nextChar <= '9')
 		nextState = 6;
-	else if ((nextChar == '(') || (nextChar == '{') || (nextChar == ')') || (nextChar == '}') || (nextChar == ';'))
+	else if (nextChar >= 'a' && nextChar <= 'z' && nextChar >= 'A' && nextChar <= 'Z')
+	{
+		printf("Expecting number or an specific identifier after %s\n", word);
+		initWord();
+		exit(-1);
+	}
+	else if (nextChar == '#')
+	{
+		printf("Expecting ';' after %s", word);
+		exit(-1);
+	}
+	else if (nextChar == ' ' || nextChar == '\n' || nextChar == '\t')
+	{
+		wordPop();
+		KTfunc();
+		initWord();
+		nextState = 0;
+	}
+	else
 	{
 		wordPop();
 		fcTfunc();
 		initWord();
 		nextState = 13;
-	}
-	else if (nextChar >= 'a' && nextChar <= 'z' && nextChar >= 'A' && nextChar <= 'Z')
-	{
-		printf("Expecting number or an specific identifier after %s\n", word);
-		initWord();
-		nextState = 12;
-	}
-	else
-	{
-		fcTfunc();
-		initWord();
-		nextState = 0;
 	}
 	return nextState;
 }
@@ -359,24 +372,34 @@ int next7(char nextChar)
 {
 	printf("Invalid Input after %s\n", word);
 	initWord();
-	return 12;
+	exit(-1);
 }
 
 //确定当前状态为8时的下一个状态，参数：读到的下一个字符
 int next8(char nextChar)
 {
-	printf("Missing ' after %s\n", word);
-	initWord();
-	return 12;
+	if (nextChar == "'")
+	{
+		cTfunc();
+		initWord();
+		return 0;
+	}
+	else
+	{
+		printf("Missing ' after %s\n", word);
+		initWord();
+		exit(-1);
+	}
 }
 
 //确定当前状态为9时的下一个状态，参数：读到的下一个字符
 int next9(char nextChar)
 {
-	printf("Missing \" after %s\n", word);
+	printf("Missing ' after %s\n", word);
 	initWord();
-	return 12;
+	exit(-1);
 }
+
 
 //确定当前状态为10时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
 int next10(char nextChar)
@@ -399,7 +422,7 @@ int next13(char nextChar)
 {
 	word[wordSize] = nextChar;
 	wordSize++;
-	return nextState = 5;
+	return 5;
 }
 
 //确定当前状态为14时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
@@ -407,7 +430,7 @@ int next14(char nextChar)
 {
 	word[wordSize] = nextChar;
 	wordSize++;
-	return nextState = 2;
+	return 2;
 }
 
 //确定当前状态为15时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
@@ -415,7 +438,7 @@ int next15(char nextChar)
 {
 	word[wordSize] = nextChar;
 	wordSize++;
-	return nextState = 1;
+	return 1;
 }
 
 //确定当前状态为16时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
@@ -423,7 +446,7 @@ int next16(char nextChar)
 {
 	word[wordSize] = nextChar;
 	wordSize++;
-	return nextState = 3;
+	return 3;
 }
 
 //确定当前状态为17时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
@@ -431,7 +454,7 @@ int next17(char nextChar)
 {
 	word[wordSize] = nextChar;
 	wordSize++;
-	return nextState = 4;
+	return 4;
 }
 
 //确定当前状态为18时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
@@ -441,7 +464,7 @@ int next18(char nextChar)
 	wordSize++;
 	PTfunc();
 	initWord();
-	return nextState = 0;
+	return 0;
 }
 
 //查询当前单词是否为关键字，是则生成对应Token项，否则运行标识符处理函数
@@ -534,12 +557,15 @@ int fcTfunc()
 	int i = 0;
 	while (word[i] != '.')
 	{
-		num += (int)(word[i] - 48) * pow(10, wordSize - i - 1);
 		i++;
+	}
+	for (int t = 0; t < i; t++)
+	{
+		num += (double)(word[t] - 48) * pow(10, i - t - 1);
 	}
 	for (int j = i + 1; j < wordSize; j++)
 	{
-		num += (int)(word[j] - 48) * pow(10, i - j);
+		num += (double)(word[j] - 48) * pow(10, i - j - 1);
 	}
 	for (int i = 0; i < fcTline; i++)
 	{
@@ -566,7 +592,7 @@ int PTfunc()
 		}
 	}
 	printf("Invalid identifier %s\n", word);
-	return 12;
+	exit(-1);
 }
 
 //输出Token，参数：单词类型，单词编号
