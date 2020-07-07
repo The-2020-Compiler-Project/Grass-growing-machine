@@ -210,6 +210,12 @@ int next2(char nextChar)
 	{
 		nextState = 2;
 	}
+	else if (nextChar >= 'a' && nextChar <= 'z' && nextChar >= 'A' && nextChar <= 'Z')
+	{
+		printf("Expecting an number or an specific identifier after %s\n", word);
+		initWord();
+		nextState = 0;
+	}
 	else
 	{
 		wordPop();
@@ -306,7 +312,7 @@ int next5(char nextChar)
 		initWord();
 		nextState = 17;
 	}
-	else if (nextChar == '}' || nextChar == ')' || nextChar == '{' || nextChar == '(')
+	else if (nextChar == '}' || nextChar == ')' || nextChar == '{' || nextChar == '(' || nextChar == ';')
 	{
 		wordPop();
 		PTfunc();
@@ -332,6 +338,12 @@ int next6(char nextChar)
 		initWord();
 		nextState = 13;
 	}
+	else if (nextChar >= 'a' && nextChar <= 'z' && nextChar >= 'A' && nextChar <= 'Z')
+	{
+		printf("Expecting number or an specific identifier after %s\n", word);
+		initWord();
+		nextState = 0;
+	}
 	else
 	{
 		fcTfunc();
@@ -344,7 +356,7 @@ int next6(char nextChar)
 //确定当前状态为7时的下一个状态，参数：读到的下一个字符
 int next7(char nextChar)
 {
-	printf("Invalid Input after %s", word);
+	printf("Invalid Input after %s\n", word);
 	initWord();
 	return nextState;
 }
@@ -352,7 +364,7 @@ int next7(char nextChar)
 //确定当前状态为8时的下一个状态，参数：读到的下一个字符
 int next8(char nextChar)
 {
-	printf("Missing ' after %s", word);
+	printf("Missing ' after %s\n", word);
 	initWord();
 	return nextState;
 }
@@ -360,7 +372,7 @@ int next8(char nextChar)
 //确定当前状态为9时的下一个状态，参数：读到的下一个字符
 int next9(char nextChar)
 {
-	printf("Missing \" after %s", word);
+	printf("Missing \" after %s\n", word);
 	initWord();
 	return nextState;
 }
@@ -552,6 +564,7 @@ int PTfunc()
 			return 1;
 		}
 	}
+	printf("Invalid identifier %s\n", word);
 	return 0;
 }
 
