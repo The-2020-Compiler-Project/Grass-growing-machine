@@ -21,7 +21,7 @@ int PTSize = 17;
 //初始化当前单词和单词的大小
 int initWord()
 {
-	memset(word, 0, MAX_IDLEN * sizeof(char));
+	memset(word, MAX_IDLEN * sizeof(int), 0);
 	wordSize = 0;
 	return 1;
 }
@@ -124,7 +124,7 @@ int ToNext(int pastState, FILE* fp)
 		}
 		else
 		{
-			//printf("LexicalAnalyse Completed!\n");
+			printf("LexicalAnalyse Completed!\n");
 			return 12;
 		}
 	}
@@ -214,7 +214,7 @@ int next2(char nextChar)
 	{
 		printf("Expecting an number or an specific identifier after %s\n", word);
 		initWord();
-		nextState = 0;
+		nextState = 12;
 	}
 	else
 	{
@@ -342,7 +342,7 @@ int next6(char nextChar)
 	{
 		printf("Expecting number or an specific identifier after %s\n", word);
 		initWord();
-		nextState = 0;
+		nextState = 12;
 	}
 	else
 	{
@@ -565,7 +565,7 @@ int PTfunc()
 		}
 	}
 	printf("Invalid identifier %s\n", word);
-	return 0;
+	return 12;
 }
 
 //输出Token，参数：单词类型，单词编号
