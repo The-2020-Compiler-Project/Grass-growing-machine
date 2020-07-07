@@ -105,6 +105,7 @@ int transition(int lastState, char nextChar)
 			break;
 		default:
 			printf("Invalid input after %s" , word);
+			nextState = 12;
 			break;
 		}
 	}
@@ -358,7 +359,7 @@ int next7(char nextChar)
 {
 	printf("Invalid Input after %s\n", word);
 	initWord();
-	return nextState;
+	return 12;
 }
 
 //确定当前状态为8时的下一个状态，参数：读到的下一个字符
@@ -366,7 +367,7 @@ int next8(char nextChar)
 {
 	printf("Missing ' after %s\n", word);
 	initWord();
-	return nextState;
+	return 12;
 }
 
 //确定当前状态为9时的下一个状态，参数：读到的下一个字符
@@ -374,7 +375,7 @@ int next9(char nextChar)
 {
 	printf("Missing \" after %s\n", word);
 	initWord();
-	return nextState;
+	return 12;
 }
 
 //确定当前状态为10时的下一个状态，返回自动机的下一状态码，参数：读到的下一个字符
