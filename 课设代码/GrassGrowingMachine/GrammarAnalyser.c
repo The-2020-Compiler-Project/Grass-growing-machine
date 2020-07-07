@@ -210,8 +210,8 @@ int exprGenerateSeq(OPR op, int argnum)
 			seq.arg2.content.ch = expr_arg2.content.ch;
 			break;
 		case exprID:
-			seq.arg1.type = seqID;
-			seq.arg1.content.str = expr_arg1.content.strID;
+			seq.arg2.type = seqID;
+			seq.arg2.content.str = expr_arg2.content.strID;
 			break;
 		default:
 			//error
@@ -476,8 +476,9 @@ TOKEN gFuncDef(TOKEN preTOKEN)
 		//error
 		break;
 	}
-	int funcoffset = DEST_PTR_SIZE + funcsize + DEST_PTR_SIZE; //sizeof(OLD BP) + sizeof(ret) + sizeof(OLD IP)
+	int funcoffset = funcsize + DEST_PTR_SIZE; //sizeof(ret) + sizeof(OLD BP)
 	PFINFL[PFInflLine].OFFSET = funcoffset;
+	iAvalFuncOffset = funcoffset;
 	//生成四元式
 	SEQUENCE seq = { FUNC, {seqID, iTable[funcnameid], true}, {seqNONE, 0, false}, {seqNONE, 0, false} };
 	sendSequence(seq);
@@ -528,6 +529,7 @@ TOKEN gDeclArgs(TOKEN preTOKEN)
 	{
 		//error
 	}
+	iAvalFuncOffset += 2 * DEST_PTR_SIZE; //用于储存CS、IP
 	passTOKEN = Next();
 	return passTOKEN;
 }
@@ -637,7 +639,7 @@ TOKEN gFuncVarDef(TOKEN preTOKEN)
 		SYMBL[SymblLine].OFFSET = iAvalFuncOffset;
 		if (iFuncVarDefMode == 1)
 		{
-			iAvalFuncOffset += DEST_PTR_SIZE;
+			iAvalFuncOffset += DEST_VN_SIZE;
 		}
 		else
 		{
@@ -650,7 +652,7 @@ TOKEN gFuncVarDef(TOKEN preTOKEN)
 		SYMBL[SymblLine].OFFSET = iAvalFuncOffset;
 		if (iFuncVarDefMode == 1)
 		{
-			iAvalFuncOffset += DEST_PTR_SIZE;
+			iAvalFuncOffset += DEST_VN_SIZE;
 		}
 		else
 		{
@@ -663,7 +665,7 @@ TOKEN gFuncVarDef(TOKEN preTOKEN)
 		SYMBL[SymblLine].OFFSET = iAvalFuncOffset;
 		if (iFuncVarDefMode == 1)
 		{
-			iAvalFuncOffset += DEST_PTR_SIZE;
+			iAvalFuncOffset += DEST_VN_SIZE;
 		}
 		else
 		{
@@ -813,14 +815,16 @@ TOKEN gProgramBody(TOKEN preTOKEN)
 	{
 		//error
 	}
+	SEQUENCE seq = { ENT, {seqNONE, 0, false}, {seqNONE, 0, false}, {seqNONE, 0, false} };
+	sendSequence(seq);
 	passTOKEN = Next();
 	while (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACE))
 	{
 		passTOKEN = gProgCode(passTOKEN);
 	}
 	//程序结构结束四元式
-	SEQUENCE seq = { END, {seqNONE, 0, false}, {seqNONE, 0, false}, {seqNONE, 0, false} };
-	sendSequence(seq);
+	SEQUENCE seq2 = { END, {seqNONE, 0, false}, {seqNONE, 0, false}, {seqNONE, 0, false} };
+	sendSequence(seq2);
 	passTOKEN = Next();
 	return passTOKEN;
 }
@@ -1102,6 +1106,7 @@ TOKEN gCodeWhile(TOKEN preTOKEN)
 		}
 	}
 	SEQUENCE seq3 = { WE, {seqNONE, 0, false}, {seqNONE, 0, false}, {seqNONE, 0, false} };
+	sendSequence(seq3);
 	passTOKEN = Next();
 	return passTOKEN;
 }
@@ -1387,8 +1392,3 @@ TOKEN gTerm(TOKEN preTOKEN)
 	passTOKEN = Next();
 	return passTOKEN;
 }
-
-
-
-
-

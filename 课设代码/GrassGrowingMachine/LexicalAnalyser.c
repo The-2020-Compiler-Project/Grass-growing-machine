@@ -21,7 +21,7 @@ int PTSize = 17;
 //初始化当前单词和单词的大小
 int initWord()
 {
-	memset(word, MAX_IDLEN * sizeof(int), 0);
+	memset(word, 0, MAX_IDLEN * sizeof(char));
 	wordSize = 0;
 	return 1;
 }
@@ -124,7 +124,7 @@ int ToNext(int pastState, FILE* fp)
 		}
 		else
 		{
-			printf("LexicalAnalyse Completed!\n");
+			//printf("LexicalAnalyse Completed!\n");
 			return 12;
 		}
 	}

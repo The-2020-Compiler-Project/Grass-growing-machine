@@ -31,6 +31,7 @@ function #函数声明
                 pa = 5;
                 return tmp+2;
             }
+            return 1;
         }
     }
 }

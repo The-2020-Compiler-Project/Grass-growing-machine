@@ -4,9 +4,6 @@
 #include "SymbolList.h"
 #include "LexicalAnalyser.h"
 #define MAX_EXPR_STACK_LEN 50
-#define TYPEL_INT &TYPEL[0]
-#define TYPEL_REAL &TYPEL[1]
-#define TYPEL_CHAR &TYPEL[2]
 
 //语法、语义分析、生成四元式
 int GrammarAnalyse();

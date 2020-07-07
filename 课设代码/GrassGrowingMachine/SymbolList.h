@@ -8,6 +8,10 @@
 #define DEST_CHAR_SIZE 2 //目标代码CHAR类型所占字节数
 #define DEST_REAL_SIZE 4 //目标代码REAL类型所占字节数
 #define DEST_PTR_SIZE 2 //目标代码指针类型（地址）所占字节数
+#define DEST_VN_SIZE 4 //目标代码换名形参所占字节数（段地址+偏移地址）
+#define TYPEL_INT &TYPEL[0]
+#define TYPEL_REAL &TYPEL[1]
+#define TYPEL_CHAR &TYPEL[2]
 
 typedef enum OPR //四元式操作符
 {
@@ -23,8 +27,8 @@ typedef enum OPR //四元式操作符
 
 typedef enum SEQARGTYPE
 {
-	//空，临时变量，标识符，整型常数，实型常数, 字符型常数
-	seqNONE, seqMIDVAR, seqID, seqDC, seqFC, seqCHAR
+	//空，标识符，整型常数，实型常数, 字符型常数
+	seqNONE, seqID, seqDC, seqFC, seqCHAR
 }SEQARGTYPE;
 
 typedef struct SEQARG //四元式参数
@@ -79,7 +83,7 @@ TYPELITEM TYPEL[MAX_SYMBLISTSIZE]; //类型表
 
 typedef enum SYMCAT //符号表中的种类项
 {
-	//函数，常量（预留），类型（预留），域名（预留），全局变量，换名形参，赋值形参，局部变量
+	//函数，常量（预留），类型（预留），全局变量，换名形参，赋值形参，局部变量
 	fCAT, cCAT, tCAT, gvCAT, vnCAT, vfCAT, svCAT
 }SYMCAT;
 
@@ -139,3 +143,34 @@ typedef struct MIDVLITEM //中间（临时）变量表项
 
 int MidvlLine; //当前已占用的行数，也就是说有效数据的范围为MIDVL[0~MidvlLine-1]
 MIDVLITEM MIDVL[MAX_SYMBLISTSIZE]; //中间（临时）变量表，在表达式求值中使用
+
+typedef struct AINFL//数组信息表（每个数组一张，使用时malloc）
+{
+	int low; //数组的下界
+	int up; //数组的上界
+	TYPELITEM CTP; //数组成分类型指针
+	int CLEN; //单个成分所占字长
+} AINFL;
+
+struct RINFLITEM //结构表表项
+{
+	char ID[MAX_IDLEN]; //域名
+	int OFF; //区距
+	TYPELITEM TP; //类型
+};
+
+typedef struct RINFL //结构表,每个结构一份，使用时malloc
+{
+	int RInflLine; //该表当前已占用的行数，从1数起
+	int totalsize; //该结构的总字长
+	struct RINFLITEM CLIST[MAX_SYMBLISTSIZE]; //成员列表
+} RINFL;
+
+//将SYMBL输出至文件，fp为目标文件，成功返回1，失败返回0
+int Output_SYMBL(FILE* fp);
+
+//将四元式列表输出至文件, SeqList为需要输出的四元式表格，SeqLine为四元式的数目（从1数起），fp为目标文件，成功返回1，失败返回0
+int Output_SeqList(SEQUENCE* SeqList, int SeqLine, FILE* fp);
+
+//将四元式操作符OPR以字符串形式输出至str，成功返回1，失败返回0
+int OPRtoStr(OPR op, char* str);
