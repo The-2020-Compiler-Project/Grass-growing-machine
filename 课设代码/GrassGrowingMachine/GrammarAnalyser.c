@@ -737,7 +737,7 @@ TOKEN gFuncVarDef(TOKEN preTOKEN)
 		SendError(2);
 	}
 	passTOKEN = Next();
-	if (!(passTOKEN.type = PTYPE && passTOKEN.id == pSEMI))
+	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pSEMI))
 	{
 		//error
 		printf("%sǰ:", FindToken(passTOKEN.type, passTOKEN.id));
