@@ -1735,8 +1735,6 @@ int SendError(int err_id)
 // 在对应表中找到对应字符，参数：字符类型，字符ID
 char* FindToken(int fTokenType, int fTokenId)
 {
-	char name[MAX_IDLEN];
-	memset(name, 0, MAX_IDLEN * sizeof(char));
 	switch (fTokenType)
 	{
 	case(KTYPE):
@@ -1746,14 +1744,10 @@ char* FindToken(int fTokenType, int fTokenId)
 	case(PTYPE):
 		return PT[fTokenId];
 	case(CTYPE):
-		name[0] = '\'';
-		name[1] = cTable[fTokenId];
-		name[2] = '\'';
-		return name;
+		return (char*)cTable[fTokenId];
 	case(STYPE):
 		return sTable[fTokenId];
 	default:
-		*name = "number";
-		return name;
+		return (char*)("A specific number");
 	}
 }
