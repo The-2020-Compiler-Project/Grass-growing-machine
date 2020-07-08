@@ -1335,7 +1335,7 @@ int SingleDestGenerate(SEQUENCE Seq)
 	switch (Seq.op)
 	{
 	case PROG:
-		buffptr += sprintf(buffptr, "_SSEG\tSEGMENT STACK\n_STK\tDW 255 DUP(0)\n_SSEG\tENDS\n");
+		buffptr += sprintf(buffptr, "_SSEG\tSEGMENT STACK\n_STK\tDW 1024 DUP(0)\n_SSEG\tENDS\n");
 		break;
 	case GV:
 		buffptr += sprintf(buffptr, "_DSEG\tSEGMENT\n_VARS\tDB %d DUP(0)\n_DSEG\tENDS\n_CSEG\tSEGMENT\n\tASSUME CS:_CSEG, DS:_DSEG, SS:_SSEG\n", iAvalDSegOffset);

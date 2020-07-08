@@ -62,6 +62,8 @@ int main(char argc, char* argv[])
     GrammarAnalyse();
     Output_SeqList(SequenceList, SeqLine, seqfile);
     Output_SYMBL(symfile);
+    fclose(seqfile);
+    fclose(symfile);
     DestGenerator(SequenceList, SeqLine, dstfile);
     return 0;
  }
