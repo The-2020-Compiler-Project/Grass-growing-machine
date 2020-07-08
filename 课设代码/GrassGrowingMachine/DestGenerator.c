@@ -76,7 +76,7 @@ int Reg_ST()
 	case vnCAT:
 		buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d]\n", SYMBL[RDL_SYMBLID].OFFSET+2);
 		buffptr += sprintf(buffptr, "\tMOV ES, BX\n");
-		buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 02H]\n", SYMBL[RDL_SYMBLID].OFFSET+2);
+		buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 2]\n", SYMBL[RDL_SYMBLID].OFFSET+2);
 		buffptr += sprintf(buffptr, "\tMOV ES:[BX], AX\n");
 		RDL_SYMBLID = -1;
 		break;
@@ -101,7 +101,7 @@ int Reg_LD(int symbl_id)
 	case vnCAT:
 		buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d]\n", SYMBL[symbl_id].OFFSET+2);
 		buffptr += sprintf(buffptr, "\tMOV ES, BX\n");
-		buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 02H]\n", SYMBL[symbl_id].OFFSET+2);
+		buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 2]\n", SYMBL[symbl_id].OFFSET+2);
 		buffptr += sprintf(buffptr, "\tMOV AX, ES:[BX]\n");
 		break;
 	default:
@@ -172,6 +172,7 @@ int sub_ADD(SEQUENCE Seq)
 	}
 	if (!isArg1AnID)
 	{
+		Reg_ST();
 		buffptr += sprintf(buffptr, "\tMOV AX, %d\n", val_arg1);
 	}
 	else //arg1为标识符
@@ -208,7 +209,6 @@ int sub_ADD(SEQUENCE Seq)
 	}
 	if (!isArg2AnID)
 	{
-		Reg_ST();
 		buffptr += sprintf(buffptr, "\tADD AX, %d\n", val_arg2);
 	}
 	else //arg2为标识符
@@ -227,7 +227,7 @@ int sub_ADD(SEQUENCE Seq)
 		case vnCAT:
 			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV ES, BX\n");
-			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 02H]\n", SYMBL[get_id].OFFSET+2);
+			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 2]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tADD AX, ES:[BX]\n");
 			break;
 		default:
@@ -322,7 +322,7 @@ int sub_SUB(SEQUENCE Seq)
 		case vnCAT:
 			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV ES, BX\n");
-			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 02H]\n", SYMBL[get_id].OFFSET+2);
+			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 2]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tSUB AX, ES:[BX]\n");
 			break;
 		default:
@@ -420,7 +420,7 @@ int sub_MUL(SEQUENCE Seq)
 		case vnCAT:
 			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV ES, BX\n");
-			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 02H]\n", SYMBL[get_id].OFFSET+2);
+			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 2]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV DX, ES:[BX]\n");
 			buffptr += sprintf(buffptr, "\tIMUL DX\n");
 			break;
@@ -522,7 +522,7 @@ int sub_DIV(SEQUENCE Seq, bool isMOD)
 		case vnCAT:
 			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV ES, BX\n");
-			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 02H]\n", SYMBL[get_id].OFFSET+2);
+			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 2]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV BX, ES:[BX]\n");
 			buffptr += sprintf(buffptr, "\tCWD\n");
 			buffptr += sprintf(buffptr, "\tIDIV BX\n");
@@ -676,7 +676,7 @@ int sub_Relation(SEQUENCE Seq)
 		case vnCAT:
 			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV ES, BX\n");
-			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 02H]\n", SYMBL[get_id].OFFSET+2);
+			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 2]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tSUB AX, ES:[BX]\n");
 			break;
 		default:
@@ -838,7 +838,7 @@ int sub_Logic(SEQUENCE Seq)
 		case vnCAT:
 			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV ES, BX\n");
-			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 02H]\n", SYMBL[get_id].OFFSET+2);
+			buffptr += sprintf(buffptr, "\tMOV BX, [BP - %d - 2]\n", SYMBL[get_id].OFFSET+2);
 			buffptr += sprintf(buffptr, "\tMOV DX, ES:[BX]\n");
 			break;
 		default:
@@ -846,7 +846,7 @@ int sub_Logic(SEQUENCE Seq)
 		}
 	}
 	//处理第二个参数，将结果置于AX
-	buffptr += sprintf(buffptr, "\tMOV DX, AX\n");
+	buffptr += sprintf(buffptr, "\tMOV AX, DX\n");
 	buffptr += sprintf(buffptr, "\tTEST AX, AX\n");
 	buffptr += sprintf(buffptr, "\tLAHF\n");
 	buffptr += sprintf(buffptr, "\tAND AX, 4000H\n"); //取ZF
@@ -978,20 +978,20 @@ int sub_PARAM(SEQUENCE Seq)
 				buffptr += sprintf(buffptr, "\tMOV AX, SS\n");
 				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
 				buffptr += sprintf(buffptr, "\tLEA AX, [BP - %d]\n", SYMBL[get_id].OFFSET + 2);
-				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d - 02H], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
+				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d - 2], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
 				break;
 			case gvCAT:
 				buffptr += sprintf(buffptr, "\tMOV AX, DS\n");
 				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
 				buffptr += sprintf(buffptr, "\tMOV BX, %d\n", SYMBL[get_id].OFFSET);
 				buffptr += sprintf(buffptr, "\tLEA AX, [BX]\n");
-				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d - 02H], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
+				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d - 2], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
 				break;
 			case vnCAT:
 				buffptr += sprintf(buffptr, "\tMOV AX, [BP - %d]\n", SYMBL[get_id].OFFSET + 2);
 				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
-				buffptr += sprintf(buffptr, "\tMOV AX, [BP - %d - 02H]\n", SYMBL[get_id].OFFSET + 2);
-				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d - 02H], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
+				buffptr += sprintf(buffptr, "\tMOV AX, [BP - %d - 2]\n", SYMBL[get_id].OFFSET + 2);
+				buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d - 2], AX\n", func_paramlist[iCurrentParamNum].OFFSET + 2);
 				break;
 			default:
 				break;
@@ -1009,11 +1009,10 @@ int sub_PARAM(SEQUENCE Seq)
 int sub_CALL(SEQUENCE Seq)
 {
 	if (Seq.op != CALL) return 0;
-	if (RDL_SYMBLID != -1)
-	{
-		Reg_ST();
-	}
-	buffptr += sprintf(buffptr, "\tMOV SS:[SI-4], BP\n"); //OLD BP //默认函数返回值为单字
+	Reg_ST();
+	int func_id = Find_SymblItemName(0, Seq.arg1.content.str);
+	if (func_id == -1) return 0;
+	buffptr += sprintf(buffptr, "\tMOV SS:[SI - %d - 2], BP\n", SYMBL[func_id].OFFSET - 2); //OLD BP //默认函数返回值为单字
 	buffptr += sprintf(buffptr, "\tMOV BP, SI\n");
 	buffptr += sprintf(buffptr, "\tCALL FAR PTR %s\n", Seq.arg1.content.str);
 	buffptr += sprintf(buffptr, "\tPOP AX\n");
@@ -1056,8 +1055,7 @@ int sub_RET(SEQUENCE Seq)
 		if (get_id == -1) return 0;
 		if (RDL_SYMBLID != get_id)
 		{
-			//将AX中的值输出给SYMBL[RDL_SYMBLID]
-			Reg_ST(); //该函数中会判断RDL_SYMBLID是否为0
+			Reg_ST();
 			//将第一个参数的值读入AX
 			Reg_LD(get_id);
 		}
@@ -1190,10 +1188,7 @@ int sub_IF(SEQUENCE Seq)
 int sub_EL(SEQUENCE Seq)
 {
 	if (Seq.op != EL) return 0;
-	if (RDL_SYMBLID != -1)
-	{
-		Reg_ST();
-	}
+	Reg_ST();
 	buffptr += sprintf(buffptr, "\tJMP _IE%d\n", IF_Stack[IF_SP - 1]);
 	buffptr += sprintf(buffptr, "_EL%d:\tNOP\n", IF_Stack[IF_SP - 1]);
 	return 1;
@@ -1210,10 +1205,7 @@ int sub_IE(SEQUENCE Seq)
 int sub_WH(SEQUENCE Seq)
 {
 	if (Seq.op != WH) return 0;
-	if (RDL_SYMBLID != -1)
-	{
-		Reg_ST();
-	}
+	Reg_ST();
 	WHILE_Push(iWhileNum);
 	++iWhileNum;
 	buffptr += sprintf(buffptr, "_WH%d:", WHILE_Stack[WHILE_SP - 1]);
@@ -1272,10 +1264,7 @@ int sub_DO(SEQUENCE Seq)
 int sub_WE(SEQUENCE Seq)
 {
 	if (Seq.op != WE) return 0;
-	if (RDL_SYMBLID != -1)
-	{
-		Reg_ST();
-	}
+	Reg_ST();
 	buffptr += sprintf(buffptr, "\tJMP _WH%d\n", WHILE_Stack[WHILE_SP - 1]);
 	buffptr += sprintf(buffptr, "_WE%d:\tNOP\n", WHILE_Stack[WHILE_SP - 1]);
 	return 1;
@@ -1325,8 +1314,9 @@ int sub_PUTC(SEQUENCE Seq)
 		}
 	}
 	buffptr += sprintf(buffptr, "\tMOV DL, AL\n");
-	buffptr += sprintf(buffptr, "\tMOV AH, 02H\n");
+	buffptr += sprintf(buffptr, "\tMOV AH, 2\n");
 	buffptr += sprintf(buffptr, "\tINT 21H\n");
+	RDL_SYMBLID = -1; //寄存器数据已被打乱，需要重新读取数据
 	return 1;
 }
 
@@ -1335,7 +1325,7 @@ int SingleDestGenerate(SEQUENCE Seq)
 	switch (Seq.op)
 	{
 	case PROG:
-		buffptr += sprintf(buffptr, "_SSEG\tSEGMENT STACK\n_STK\tDW 255 DUP(0)\n_SSEG\tENDS\n");
+		buffptr += sprintf(buffptr, "_SSEG\tSEGMENT STACK\n_STK\tDW 1024 DUP(0)\n_SSEG\tENDS\n");
 		break;
 	case GV:
 		buffptr += sprintf(buffptr, "_DSEG\tSEGMENT\n_VARS\tDB %d DUP(0)\n_DSEG\tENDS\n_CSEG\tSEGMENT\n\tASSUME CS:_CSEG, DS:_DSEG, SS:_SSEG\n", iAvalDSegOffset);

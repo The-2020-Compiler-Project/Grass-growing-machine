@@ -684,7 +684,7 @@ TOKEN gDeclVns(TOKEN preTOKEN)
 TOKEN gDeclFuncVars(TOKEN preTOKEN)
 {
 	TOKEN passTOKEN = preTOKEN;
-	if (!(passTOKEN.type == KTYPE && passTOKEN.id == kPTR))
+	if (!(passTOKEN.type == KTYPE && passTOKEN.id == kVAR))
 	{
 		//error
 		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
@@ -1468,7 +1468,7 @@ TOKEN gAddSuffix(TOKEN preTOKEN)
 		return passTOKEN;
 	}
 	//非空
-	if (!(passTOKEN.type == PTYPE && (passTOKEN.id == pADD || passTOKEN.id == pMUL)))
+	if (!(passTOKEN.type == PTYPE && (passTOKEN.id == pADD || passTOKEN.id == pSUB)))
 	{
 		//error
 		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
@@ -1511,7 +1511,7 @@ TOKEN gMulSuffix(TOKEN preTOKEN)
 		return passTOKEN;
 	}
 	//非空
-	if (!(passTOKEN.type == PTYPE && (passTOKEN.id == pMUL || passTOKEN.id == pADD || passTOKEN.id == pSUB)))
+	if (!(passTOKEN.type == PTYPE && (passTOKEN.id == pMUL || passTOKEN.id == pDIV || passTOKEN.id == pMOD)))
 	{
 		//error
 		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
@@ -1545,7 +1545,8 @@ TOKEN gTerm(TOKEN preTOKEN)
 	//括号内表达式
 	if (passTOKEN.type == PTYPE && passTOKEN.id == pLBRACKET)
 	{
-		passTOKEN = gExpr(passTOKEN);
+		passTOKEN = Next();
+		passTOKEN = gLogicExpr(passTOKEN);
 		if (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACKET))
 		{
 			//error

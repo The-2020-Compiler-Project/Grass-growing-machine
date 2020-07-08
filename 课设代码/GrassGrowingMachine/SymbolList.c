@@ -66,7 +66,7 @@ int Output_SeqList(SEQUENCE* SeqList, int SeqLine, FILE* fp)
 			fprintf(fp, "%.2lf,\t", seq.arg1.content.f);
 			break;
 		case seqCHAR:
-			fprintf(fp, "%c,\t", seq.arg1.content.ch);
+			fprintf(fp, "'%c',\t", seq.arg1.content.ch);
 			break;
 		case seqID:
 			fprintf(fp, "%s[%d],\t", seq.arg1.content.str, seq.arg1.active);
@@ -87,7 +87,7 @@ int Output_SeqList(SEQUENCE* SeqList, int SeqLine, FILE* fp)
 			fprintf(fp, "%.2lf,\t", seq.arg2.content.f);
 			break;
 		case seqCHAR:
-			fprintf(fp, "%c,\t", seq.arg2.content.ch);
+			fprintf(fp, "'%c',\t", seq.arg2.content.ch);
 			break;
 		case seqID:
 			fprintf(fp, "%s[%d],\t", seq.arg2.content.str, seq.arg2.active);
