@@ -1,49 +1,63 @@
 #pragma once
 #include "SymbolList.h"
 
-typedef struct BLOCK_INFO
+typedef struct Block_Info
 {
-	int order;
-	int begin_pos;
-	int end_pos;
-	int kind;  //0:usual 1:if 2:while
-	struct BLOCK_INFO* next;
-}BLOCK_INFO;
+	int begin_pos;		// 基本块入口
+	int end_pos;		// 基本块出口
+	struct Block_Info* next;
+}Block_Info, Block_Info_List;
 
-
-
-typedef struct Node  //DAG图结点的数据结构
+typedef struct Arg_Node
 {
-	int order;
-	OPR op;
-	struct Node* first_operand;
-	struct Node* second_operand;
-	int flag;   //表明该节点是否有用
-	int arg_num;
-	struct Node** arg_list;
-	struct Node* next;
-}Node;
+	SEQARG arg;
+	struct Arg_Node* next;
+} Arg_Node, Arg_List;
 
-typedef struct info_list  //存放标识符与结点的对应信息
+
+typedef struct Node  //DAG图结点的数据结构 双向链表
 {
-	int order; //序号 /
-	SEQARGTYPE type; //类型
-	union content content; //内容
-	Node* node; //对应的结点的指针 //头结点 会指向最近的函数调用结点
-	struct info_list* next;
-}info_list;
+	OPR op;		// 运算符
+	struct Node* first_operand;     // 第一操作数所在结点
+	struct Node* second_operand;	// 第二操作数所在结点
+	int flag;   // 表明该节点是否有用
+	Arg_List* seqID_list;			// 用户定义标识符表
+	Arg_List* seqMIDVAR_list;		// 中间变量表
+	Arg_List* seqConstant_list;		// 常量表(最多只有一个常量)
+	struct Node* next;  // 下一结点
+	struct Node* prev;	// 前一结点
+}Node, Node_Set;
+
+typedef struct Arg_Info  // 存放操作数与结点的对应信息 单向链表
+{
+	SEQARG* arg;			// 操作数
+	Node* node;				// 对应结点
+	struct Arg_Info* next;
+}Arg_Info, Arg_Info_List;
+
+typedef struct Active_Info  //SYMBL
+{
+	SEQARG* arg;
+	bool active;
+	struct Active_Info* next;
+}Active_Info, Active_Info_List;
+
 
 int optimize();
-int divide(BLOCK_INFO* p);
-int optimize_block(BLOCK_INFO* p);
-int is_block_start(int pos);
-int fill_Sequence_outside_block(BLOCK_INFO* p);
-int search_block_end(int pos);
-int set_active_info(int start, int end);
-int create_DAG_graph(BLOCK_INFO* info, Node* node_set, info_list* list);
-int rewrite_Sequence(Node* node_set, info_list* list);
-int in_info_list(SEQARG arg);
-info_list* arg_into_info_list(int pos, info_list* last_info);
-info_list* get_arg_info(SEQARG arg, info_list* list);
-Node* create_new_node(Node* last_node);
-Node* search_node_in_set(Node* first, Node* second, int pos);
+int is_entrance(int pos);
+int is_exit(int pos);
+int create_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list, Block_Info_List* block_info);
+int reorganize_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list);
+int get_SeqList_from_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list);
+int set_active_info(int start);
+int free_list(void* p, int list_kind);
+Arg_Info* get_arg_info_from_list(SEQARG* arg, Arg_Info_List* arg_info_list);
+Node* add_new_node_into_set(Node* last_node);
+int add_seqValue_into_node(Node* node, Arg_Info* arg_info);
+Node* search_parent_node(Arg_Info* arg1_info, Arg_Info* arg2_info, OPR op, Node_Set* node_set);
+int set_flag(Node_Set* last_node, Arg_Info_List* arg_info_list);
+SEQARG get_value_of_node(Node* node);
+int set_operand_flag_1(Node* node);
+Active_Info* get_active_info_from_list(SEQARG* arg, Active_Info_List* active_info_list);
+Active_Info* add_arg_into_active_info_list(SEQARG* arg, Active_Info* last_info);
+int revise_active_info(SEQARG* arg, bool active, Active_Info_List* active_info_list);
