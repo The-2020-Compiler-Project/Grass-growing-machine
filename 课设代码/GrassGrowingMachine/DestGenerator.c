@@ -846,7 +846,7 @@ int sub_Logic(SEQUENCE Seq)
 		}
 	}
 	//处理第二个参数，将结果置于AX
-	buffptr += sprintf(buffptr, "\tMOV DX, AX\n");
+	buffptr += sprintf(buffptr, "\tMOV AX, DX\n");
 	buffptr += sprintf(buffptr, "\tTEST AX, AX\n");
 	buffptr += sprintf(buffptr, "\tLAHF\n");
 	buffptr += sprintf(buffptr, "\tAND AX, 4000H\n"); //取ZF

@@ -1545,7 +1545,8 @@ TOKEN gTerm(TOKEN preTOKEN)
 	//括号内表达式
 	if (passTOKEN.type == PTYPE && passTOKEN.id == pLBRACKET)
 	{
-		passTOKEN = gExpr(passTOKEN);
+		passTOKEN = Next();
+		passTOKEN = gLogicExpr(passTOKEN);
 		if (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACKET))
 		{
 			//error
