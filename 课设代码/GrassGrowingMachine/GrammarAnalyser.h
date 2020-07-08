@@ -58,6 +58,8 @@ int fillExprSeqArg(SEQARG* seqarg);
 int Find_SymblItemName(int startpos, char* name);
 //判断某个标识符是否是当前作用域可访问的变量名，若是则返回其在符号表中的编号，否则返回-1
 int getAvailableVar(char* name);
+//判断某个标识符是否是当前函数的变量或形参（不包括全局变量），若是则返回其在符号表中的编号，否则返回-1
+int getCurrentFuncVar(char* name);
 
 //递归下降子程序（均以‘g’开头）
 

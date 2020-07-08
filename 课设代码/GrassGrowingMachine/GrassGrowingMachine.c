@@ -41,17 +41,23 @@ int main(char argc, char* argv[])
     }
     else if (argc != 3 || !(srcfile = fopen(argv[1], "r")) || !(dstfile = fopen(argv[2], "w")))
     {
-        printf("未输入文件或者文件不存在！");
+        printf("未输入文件或者文件不存在！\n");
         return -1;
     }
 
-    printf("文件读取成功!");
+    printf("文件读取成功\n");
     //此处以后可以进行文件的读取操作测试等
 
     FILE* seqfile = fopen("Hello_Sequence.txt", "w");
     if (!seqfile) return -1;
     FILE* symfile = fopen("Hello_SYMBL.txt", "w");
     if (!symfile) return -1;
+
+    //TOKEN newtoken;
+    //while (1)
+    //{
+    //    newtoken = Next();
+    //}
 
     GrammarAnalyse();
     Output_SeqList(SequenceList, SeqLine, seqfile);

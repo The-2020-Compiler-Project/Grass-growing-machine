@@ -1195,14 +1195,14 @@ int sub_EL(SEQUENCE Seq)
 		Reg_ST();
 	}
 	buffptr += sprintf(buffptr, "\tJMP _IE%d\n", IF_Stack[IF_SP - 1]);
-	buffptr += sprintf(buffptr, "_EL%d:", IF_Stack[IF_SP - 1]);
+	buffptr += sprintf(buffptr, "_EL%d:\tNOP\n", IF_Stack[IF_SP - 1]);
 	return 1;
 }
 
 int sub_IE(SEQUENCE Seq)
 {
 	if (Seq.op != IE) return 0;
-	buffptr += sprintf(buffptr, "_IE%d:", IF_Stack[IF_SP - 1]);
+	buffptr += sprintf(buffptr, "_IE%d:\tNOP\n", IF_Stack[IF_SP - 1]);
 	IF_Pop();
 	return 1;
 }
@@ -1277,7 +1277,7 @@ int sub_WE(SEQUENCE Seq)
 		Reg_ST();
 	}
 	buffptr += sprintf(buffptr, "\tJMP _WH%d\n", WHILE_Stack[WHILE_SP - 1]);
-	buffptr += sprintf(buffptr, "_WE%d:", WHILE_Stack[WHILE_SP - 1]);
+	buffptr += sprintf(buffptr, "_WE%d:\tNOP\n", WHILE_Stack[WHILE_SP - 1]);
 	return 1;
 }
 

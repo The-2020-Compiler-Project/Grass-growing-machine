@@ -88,6 +88,34 @@ int getAvailableVar(char* name)
 	}
 }
 
+int getCurrentFuncVar(char* name)
+{
+	int found = -1;
+	int foundgv = -1;	//全局变量
+	int foundfuncv = -1; //函数变量
+	if (currentFunc == NULL) return -1;
+	do
+	{
+		found = Find_SymblItemName(found + 1, name);
+		if (found != -1)
+		{
+			if (SYMBL[found].cat == gvCAT) //若有全局变量则跳过
+			{
+				continue;
+			}
+			else if (SYMBL[found].cat == vfCAT || SYMBL[found].cat == vnCAT || SYMBL[found].cat == svCAT)
+			{
+				//判断是否归属于当前函数
+				if (SYMBL[found].addr == currentFunc)
+				{
+					return found;
+				}
+			}
+		}
+	} while (found != -1);
+	return -1;
+}
+
 int fillExprSeqArg(SEQARG* seqarg)
 {
 	switch (exprProcessed.type)
@@ -217,6 +245,7 @@ int exprGenerateSeq(OPR op, int argnum)
 			//error
 			break;
 		}
+		//检查类型是否匹配
 		seq.target.type = seqID;
 		seq.target.content.str = gotten_midvarname;
 		sendSequence(seq);
@@ -364,6 +393,13 @@ TOKEN gVarDef(TOKEN preTOKEN)
 	//记下变量名在标识符表中的编号
 	int varnameid = passTOKEN.id;
 	strcpy(varname, iTable[varnameid]);
+	//查重
+	if (Find_SymblItemName(0, varname) != -1)
+	{
+		//error
+		printf("%s:", varname);
+		SendError(1);
+	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pSEMI))
 	{
@@ -440,6 +476,13 @@ TOKEN gFuncDef(TOKEN preTOKEN)
 	char funcname[MAX_IDLEN];
 	int funcnameid = passTOKEN.id;
 	strcpy(funcname, iTable[funcnameid]);
+	//查重
+	if (Find_SymblItemName(0, funcname) != -1)
+	{
+		//error
+		printf("%s:", funcname);
+		SendError(1);
+	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pLBRACE))
 	{
@@ -622,6 +665,13 @@ TOKEN gFuncVarDef(TOKEN preTOKEN)
 	char varname[MAX_IDLEN];
 	int varnameid = passTOKEN.id;
 	strcpy(varname, iTable[varnameid]);
+	//查重
+	if (getCurrentFuncVar(varname) != -1)
+	{
+		//error
+		printf("%s:", varname);
+		SendError(2);
+	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type = PTYPE && passTOKEN.id == pSEMI))
 	{
@@ -1391,4 +1441,21 @@ TOKEN gTerm(TOKEN preTOKEN)
 	exprPUSH(term_expr);
 	passTOKEN = Next();
 	return passTOKEN;
+}
+
+int SendError(int err_id)
+{
+	switch (err_id)
+	{
+	case 1:
+		printf("出现重定义错误\n");
+		break;
+	case 2:
+		printf("参数或函数局部变量出现重定义\n");
+		break;
+	default:
+		break;
+	}
+	exit(err_id);
+	return err_id;
 }
