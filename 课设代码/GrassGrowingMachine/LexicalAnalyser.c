@@ -210,7 +210,7 @@ int next2(char nextChar)
 	{
 		nextState = 2;
 	}
-	else if (nextChar >= 'a' && nextChar <= 'z' && nextChar >= 'A' && nextChar <= 'Z')
+	else if ((nextChar >= 'a' && nextChar <= 'z') || (nextChar >= 'A' && nextChar <= 'Z'))
 	{
 		printf("Expecting an number or an specific identifier after %s\n", word);
 		initWord();
@@ -339,7 +339,7 @@ int next6(char nextChar)
 {
 	if (nextChar >= '0' && nextChar <= '9')
 		nextState = 6;
-	else if (nextChar >= 'a' && nextChar <= 'z' && nextChar >= 'A' && nextChar <= 'Z')
+	else if ((nextChar >= 'a' && nextChar <= 'z') || (nextChar >= 'A' && nextChar <= 'Z'))
 	{
 		printf("Expecting number or an specific identifier after %s\n", word);
 		initWord();
