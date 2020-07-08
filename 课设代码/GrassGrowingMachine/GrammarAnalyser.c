@@ -168,16 +168,22 @@ int exprGenerateSeq(OPR op, int argnum)
 		if (!exprPOP(&expr_arg2))
 		{
 			//error
+			printf("OP:%d ", op);
+			SendError(3);
 		}
 		exprProcessedType expr_arg1;
 		if (!exprPOP(&expr_arg1))
 		{
 			//error
+			printf("OP:%d", op);
+			SendError(4);
 		}
 		//检查数据类型是否相同
 		if (expr_arg1.datatype != expr_arg2.datatype)
 		{
 			//error
+			printf("OP:%d", op);
+			SendError(5);
 		}
 		char* gotten_midvarname = NULL; //生成的中间变量名
 		exprProcessedType exprmidvar; //生成的中间变量的表达式项，用于栈
@@ -189,6 +195,8 @@ int exprGenerateSeq(OPR op, int argnum)
 			if (!gotten_midvarname)
 			{
 				//error
+				printf("near OP:%d", op);
+				SendError(6);
 			}
 		}
 		else
@@ -221,6 +229,8 @@ int exprGenerateSeq(OPR op, int argnum)
 			break;
 		default:
 			//error
+			printf("expr_arg1.type:%d ， 第一", expr_arg1.type);
+			SendError(7);
 			break;
 		}
 		switch (expr_arg2.type) //两个参数数据类型相同,但seq类型可能不相同（一个是常数，一个是标识符）
@@ -243,6 +253,8 @@ int exprGenerateSeq(OPR op, int argnum)
 			break;
 		default:
 			//error
+			printf("expr_arg2.type:%d , 第二", expr_arg2.type);
+			SendError(7);
 			break;
 		}
 		//检查类型是否匹配
@@ -330,16 +342,21 @@ TOKEN gHeadOfProgram(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && passTOKEN.id == kPROGRAM))
 	{
 		//error
+		SendError(8);
 	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == ITYPE))
 	{
 		//error
+		printf("\"program\"后");
+		SendError(9);
 	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pSEMI))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(10);
 	}
 	//输出程序头四元式
 	SEQUENCE seq = { PROG, {seqNONE, 0, false}, {seqNONE, 0, false}, {seqNONE, 0, false} };
@@ -355,11 +372,14 @@ TOKEN gDeclVars(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && passTOKEN.id == kVAR))
 	{
 		//error
+		SendError(11);
 	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pLBRACE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(12);
 	}
 	SEQUENCE seq = { GV, {seqNONE, 0, false}, {seqNONE, 0, false}, {seqNONE, 0, false} };
 	sendSequence(seq);
@@ -380,6 +400,8 @@ TOKEN gVarDef(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && (passTOKEN.id == kINT || passTOKEN.id == kCHAR || passTOKEN.id == kREAL)))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(13);
 	}
 	//记下数据类型
 	KEYWORD vartype = passTOKEN.id;
@@ -387,6 +409,8 @@ TOKEN gVarDef(TOKEN preTOKEN)
 	if (!(passTOKEN.type == ITYPE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(12);
 	}
 	//记下变量名
 	char varname[MAX_IDLEN];
@@ -404,6 +428,8 @@ TOKEN gVarDef(TOKEN preTOKEN)
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pSEMI))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(10);
 	}
 	//填写符号表
 	strcpy(SYMBL[SymblLine].name, varname);
@@ -427,6 +453,8 @@ TOKEN gVarDef(TOKEN preTOKEN)
 		break;
 	default:
 		//error
+		printf("%s:", varname);
+		SendError(15);
 		break;
 	}
 	iAvalDSegOffset += varsize;
@@ -445,11 +473,15 @@ TOKEN gDeclFuncs(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && passTOKEN.id == kFUNCTION))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(14);
 	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pLBRACE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(12);
 	}
 	passTOKEN = Next();
 	while (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACE))
@@ -466,12 +498,16 @@ TOKEN gFuncDef(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && (passTOKEN.id == kINT || passTOKEN.id == kREAL || passTOKEN.id == kCHAR)))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(13);
 	}
 	KEYWORD functype = passTOKEN.id;
 	passTOKEN = Next();
 	if (!(passTOKEN.type == ITYPE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(9);
 	}
 	char funcname[MAX_IDLEN];
 	int funcnameid = passTOKEN.id;
@@ -487,6 +523,8 @@ TOKEN gFuncDef(TOKEN preTOKEN)
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pLBRACE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(12);
 	}
 	//当前函数状态改变
 	currentFunc = &PFINFL[PFInflLine];
@@ -517,6 +555,8 @@ TOKEN gFuncDef(TOKEN preTOKEN)
 		break;
 	default:
 		//error
+		printf("%s:", funcname);
+		SendError(15);
 		break;
 	}
 	int funcoffset = funcsize + DEST_PTR_SIZE; //sizeof(ret) + sizeof(OLD BP)
@@ -533,6 +573,8 @@ TOKEN gFuncDef(TOKEN preTOKEN)
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(16);
 	}
 	//记录至函数信息表
 	PFINFL[PFInflLine].LEVEL = 1;
@@ -559,11 +601,15 @@ TOKEN gDeclArgs(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && passTOKEN.id == kARGS))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(17);
 	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pLBRACE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(12);
 	}
 	passTOKEN = Next();
 	passTOKEN = gDeclVfs(passTOKEN);
@@ -571,6 +617,8 @@ TOKEN gDeclArgs(TOKEN preTOKEN)
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(16);
 	}
 	iAvalFuncOffset += 2 * DEST_PTR_SIZE; //用于储存CS、IP
 	passTOKEN = Next();
@@ -583,11 +631,15 @@ TOKEN gDeclVfs(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && passTOKEN.id == kVAL))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(18);
 	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pLBRACE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(12);
 	}
 	passTOKEN = Next();
 	iFuncVarDefMode = 0; //赋值形参定义模式
@@ -607,11 +659,15 @@ TOKEN gDeclVns(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && passTOKEN.id == kPTR))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(19);
 	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pLBRACE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(12);
 	}
 	passTOKEN = Next();
 	iFuncVarDefMode = 1; //换名形参定义模式
@@ -631,11 +687,15 @@ TOKEN gDeclFuncVars(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && passTOKEN.id == kPTR))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(19);
 	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pLBRACE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(12);
 	}
 	passTOKEN = Next();
 	iFuncVarDefMode = 2; //局部变量定义模式
@@ -655,12 +715,16 @@ TOKEN gFuncVarDef(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && (passTOKEN.id == kINT || passTOKEN.id == kCHAR || passTOKEN.id == kREAL)))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(13);
 	}
 	KEYWORD vartype = passTOKEN.id;
 	passTOKEN = Next();
 	if (!(passTOKEN.type == ITYPE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(9);
 	}
 	char varname[MAX_IDLEN];
 	int varnameid = passTOKEN.id;
@@ -676,6 +740,8 @@ TOKEN gFuncVarDef(TOKEN preTOKEN)
 	if (!(passTOKEN.type = PTYPE && passTOKEN.id == pSEMI))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(10);
 	}
 	//填写符号表
 	strcpy(SYMBL[SymblLine].name, varname);
@@ -724,6 +790,8 @@ TOKEN gFuncVarDef(TOKEN preTOKEN)
 		break;
 	default:
 		//error
+		printf("%s:", varname);
+		SendError(15);
 		break;
 	}
 	switch (iFuncVarDefMode)
@@ -763,6 +831,8 @@ TOKEN gFuncVarDef(TOKEN preTOKEN)
 		break;
 	default:
 		//error
+		printf("%s:", SYMBL[SymblLine].name);
+		SendError(20);
 		break;
 	}
 	++SymblLine;
@@ -776,11 +846,15 @@ TOKEN gFuncBody(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && passTOKEN.id == kBODY))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(21);
 	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type = PTYPE && passTOKEN.id == pLBRACE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(12);
 	}
 	passTOKEN = Next();
 	while (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACE))
@@ -815,6 +889,8 @@ TOKEN gFuncCode(TOKEN preTOKEN)
 			break;
 		default:
 			//error
+			printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+			SendError(22);
 			break;
 		}
 	}
@@ -825,6 +901,8 @@ TOKEN gFuncCode(TOKEN preTOKEN)
 	else
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(23);
 	}
 	return passTOKEN;
 }
@@ -835,6 +913,8 @@ TOKEN gCodeReturn(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && passTOKEN.id == kRETURN))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(24);
 	}
 	passTOKEN = Next();
 	passTOKEN = gExpr(passTOKEN);
@@ -848,6 +928,8 @@ TOKEN gCodeReturn(TOKEN preTOKEN)
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pSEMI))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(10);
 	}
 	passTOKEN = Next();
 	return passTOKEN;
@@ -859,11 +941,15 @@ TOKEN gProgramBody(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && passTOKEN.id == kBODY))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(21);
 	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pLBRACE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(12);
 	}
 	SEQUENCE seq = { ENT, {seqNONE, 0, false}, {seqNONE, 0, false}, {seqNONE, 0, false} };
 	sendSequence(seq);
@@ -900,6 +986,8 @@ TOKEN gProgCode(TOKEN preTOKEN)
 			break;
 		default:
 			//error
+			printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+			SendError(22);
 			break;
 		}
 	}
@@ -910,6 +998,8 @@ TOKEN gProgCode(TOKEN preTOKEN)
 	else
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(23);
 	}
 	return passTOKEN;
 }
@@ -920,6 +1010,8 @@ TOKEN gCodeAssign(TOKEN preTOKEN)
 	if (!(passTOKEN.type == ITYPE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(9);
 	}
 	char dest_varname[MAX_IDLEN];
 	int dest_varnameid = passTOKEN.id;
@@ -928,12 +1020,16 @@ TOKEN gCodeAssign(TOKEN preTOKEN)
 	int dest_var_symblID = getAvailableVar(dest_varname);
 	if (dest_var_symblID == -1)
 	{
-		//error 非法标识符或无法访问的变量
+		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(25);
 	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pASSI))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(26);
 	}
 	passTOKEN = Next();
 	if (passTOKEN.type == ITYPE)
@@ -950,12 +1046,15 @@ TOKEN gCodeAssign(TOKEN preTOKEN)
 			//判断返回值类型是否与被赋值变量相同
 			if (SYMBL[dest_var_symblID].type != SYMBL[func_symblID].type)
 			{
-				//error 返回值类型不对应
+				//error
+				printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+				SendError(27);
 			}
 			char *midvarname = allocMidVar(SYMBL[func_symblID].type);
 			if (midvarname == NULL)
 			{
-				//栈空间申请错误
+				//error
+				SendError(28);
 			}
 			//生成函数调用四元式
 			SEQUENCE seq = { CALL, {seqID, iTable[iNameIdToCheck], true}, {seqNONE, 0, false}, {seqID, midvarname, true} };
@@ -975,6 +1074,8 @@ TOKEN gCodeAssign(TOKEN preTOKEN)
 	else
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(23);
 	}
 	if (!exprProcessed.type == exprNULL) //若刚刚进行了表达式分析
 	{
@@ -986,6 +1087,8 @@ TOKEN gCodeAssign(TOKEN preTOKEN)
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pSEMI))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(10);
 	}
 	passTOKEN = Next();
 	return passTOKEN;
@@ -997,11 +1100,15 @@ TOKEN gCodePrint(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && passTOKEN.id == kPUTC))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(29);
 	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pLBRACKET))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(30);
 	}
 	passTOKEN = Next();
 	passTOKEN = gExpr(passTOKEN);
@@ -1012,16 +1119,22 @@ TOKEN gCodePrint(TOKEN preTOKEN)
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pSEMI))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(10);
 	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACKET))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(31);
 	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pSEMI))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(10);
 	}
 	passTOKEN = Next();
 	return passTOKEN;
@@ -1033,6 +1146,8 @@ TOKEN gCodeEnd(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && passTOKEN.id == kENDP))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(32);
 	}
 	SEQUENCE seq = { EXIT, {seqNONE, 0, false}, {seqNONE, 0, false} , {seqNONE, 0, false} };
 	sendSequence(seq);
@@ -1040,6 +1155,8 @@ TOKEN gCodeEnd(TOKEN preTOKEN)
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pSEMI))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(10);
 	}
 	passTOKEN = Next();
 	return passTOKEN;
@@ -1051,11 +1168,15 @@ TOKEN gCodeIF(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && passTOKEN.id == kIF))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(33);
 	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pLBRACKET))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(30);
 	}
 	passTOKEN = Next();
 	passTOKEN = gExpr(passTOKEN);
@@ -1066,11 +1187,15 @@ TOKEN gCodeIF(TOKEN preTOKEN)
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACKET))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(31);
 	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pLBRACE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(12);
 	}
 	passTOKEN = Next();
 	while (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACE))
@@ -1088,6 +1213,8 @@ TOKEN gCodeIF(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && passTOKEN.id == kELSE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(34);
 	}
 	SEQUENCE seq2 = { EL, {seqNONE, 0, false}, {seqNONE, 0, false}, {seqNONE, 0, false} };
 	sendSequence(seq2);
@@ -1095,6 +1222,8 @@ TOKEN gCodeIF(TOKEN preTOKEN)
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pLBRACE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(12);
 	}
 	passTOKEN = Next();
 	while (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACE))
@@ -1120,6 +1249,8 @@ TOKEN gCodeWhile(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && passTOKEN.id == kWHILE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(35);
 	}
 	SEQUENCE seq = { WH, {seqNONE, 0, false}, {seqNONE, 0, false}, {seqNONE, 0, false} };
 	sendSequence(seq);
@@ -1127,6 +1258,8 @@ TOKEN gCodeWhile(TOKEN preTOKEN)
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pLBRACKET))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(30);
 	}
 	passTOKEN = Next();
 	passTOKEN = gExpr(passTOKEN);
@@ -1137,11 +1270,15 @@ TOKEN gCodeWhile(TOKEN preTOKEN)
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACKET))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(31);
 	}
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pLBRACE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(12);
 	}
 	passTOKEN = Next();
 	while (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACE))
@@ -1169,12 +1306,16 @@ TOKEN gCodeCall(TOKEN preTOKEN)
 	if (!(passTOKEN.type == ITYPE))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(9);
 	}
 	int funcnameid = passTOKEN.id;
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pLBRACKET))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(30);
 	}
 	passTOKEN = Next();
 	while (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACKET))
@@ -1188,6 +1329,8 @@ TOKEN gCodeCall(TOKEN preTOKEN)
 		if (!(passTOKEN.type == PTYPE && passTOKEN.id == pSEMI))
 		{
 			//error
+			printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+			SendError(10);
 		}
 		passTOKEN = Next();
 	}
@@ -1228,6 +1371,8 @@ TOKEN gLogicSuffix(TOKEN preTOKEN)
 	if (!(passTOKEN.type == KTYPE && (passTOKEN.id == kAND || passTOKEN.id == kOR)))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(36);
 	}
 	OPR op;
 	switch (passTOKEN.id)
@@ -1270,6 +1415,8 @@ TOKEN gRelationSuffix(TOKEN preTOKEN)
 		(passTOKEN.id == pGE || passTOKEN.id == pGT || passTOKEN.id == pLE || passTOKEN.id == pLT || passTOKEN.id == pEQL || passTOKEN.id == pNEQ)))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(37);
 	}
 	OPR op;
 	switch (passTOKEN.id)
@@ -1324,6 +1471,8 @@ TOKEN gAddSuffix(TOKEN preTOKEN)
 	if (!(passTOKEN.type == PTYPE && (passTOKEN.id == pADD || passTOKEN.id == pMUL)))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(38);
 	}
 	OPR op;
 	switch (passTOKEN.id)
@@ -1365,6 +1514,8 @@ TOKEN gMulSuffix(TOKEN preTOKEN)
 	if (!(passTOKEN.type == PTYPE && (passTOKEN.id == pMUL || passTOKEN.id == pADD || passTOKEN.id == pSUB)))
 	{
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(38);
 	}
 	OPR op;
 	switch (passTOKEN.id)
@@ -1398,6 +1549,8 @@ TOKEN gTerm(TOKEN preTOKEN)
 		if (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACKET))
 		{
 			//error
+			printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+			SendError(31);
 		}
 		passTOKEN = Next();
 		return passTOKEN;
@@ -1412,6 +1565,8 @@ TOKEN gTerm(TOKEN preTOKEN)
 		if (found == -1)
 		{
 			//error
+			printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+			SendError(39);
 		}
 		term_expr.type = exprID;
 		term_expr.datatype = SYMBL[found].type;
@@ -1436,6 +1591,8 @@ TOKEN gTerm(TOKEN preTOKEN)
 
 	default:
 		//error
+		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
+		SendError(40);
 		break;
 	}
 	exprPUSH(term_expr);
@@ -1453,9 +1610,150 @@ int SendError(int err_id)
 	case 2:
 		printf("参数或函数局部变量出现重定义\n");
 		break;
+	case 3:
+		printf("运算符右参数缺失\n");
+		break;
+	case 4:
+		printf("运算符左参数缺失\n");
+		break;
+	case 5:
+		printf("运算符左右参数不匹配\n");
+		break;
+	case 6:
+		printf("临时变量生成失败\n");
+		break;
+	case 7:
+		printf("参数数据类型错误(四元式生成失败)\n");
+		break;
+	case 8:
+		printf("缺少\"program\"声明\n");
+		break;
+	case 9:
+		printf("缺少标识符\n");
+		break;
+	case 10:
+		printf("缺少';'\n");
+		break;
+	case 11:
+		printf("缺少\"var\"声明\n");
+		break;
+	case 12:
+		printf("缺少'{'\n");
+		break;
+	case 13:
+		printf("缺少变量类型\n");
+		break;
+	case 14:
+		printf("缺少\"function\"声明\n");
+		break;
+	case 15:
+		printf("变量类型名错误");
+		break;
+	case 16:
+		printf("缺少'}'\n");
+		break;
+	case 17:
+		printf("缺少\"args\"声明\n");
+		break;
+	case 18:
+		printf("缺少\"val\"声明\n");
+		break;
+	case 19:
+		printf("缺少\"ptr\"声明\n");
+		break;
+	case 20:
+		printf("变量形参类型错误\n");
+		break;
+	case 21:
+		printf("缺少\"body\"声明\n");
+		break;
+	case 22:
+		printf("错误出现的关键字\n");
+		break;
+	case 23:
+		printf("错误出现的输入序列\n");
+		break;
+	case 24:
+		printf("缺少\"return\"\n");
+		break;
+	case 25:
+		printf("非法标识符或无法访问的变量\n");
+		break;
+	case 26:
+		printf("缺少'='\n");
+		break;
+	case 27:
+		printf("函数返回值类型不对应\n");
+		break;
+	case 28:
+		printf("栈空间申请错误\n");
+		break;
+	case 29:
+		printf("缺少\"putc\"\n");
+		break;
+	case 30:
+		printf("缺少'('\n");
+		break;
+	case 31:
+		printf("缺少')'\n");
+		break;
+	case 32:
+		printf("缺少\"endp\"\n");
+		break;
+	case 33:
+		printf("缺少\"if\"\n");
+		break;
+	case 34:
+		printf("缺少\"else\"\n");
+		break;
+	case 35:
+		printf("缺少\"while\"\n");
+		break;
+	case 36:
+		printf("缺少逻辑运算符\n");
+		break;
+	case 37:
+		printf("缺少关系运算符\n");
+		break;
+	case 38:
+		printf("缺少算数运算符\n");
+		break;
+	case 39:
+		printf("未定义的标识符\n");
+		break;
+	case 40:
+		printf("未定义的项类型\n");
+		break;
 	default:
+		printf("未定义的错误类型\n");
 		break;
 	}
 	exit(err_id);
 	return err_id;
+}
+
+// 在对应表中找到对应字符，参数：字符类型，字符ID
+char* FindToken(int fTokenType, int fTokenId)
+{
+	char name[MAX_IDLEN];
+	memset(name, 0, MAX_IDLEN * sizeof(char));
+	switch (fTokenType)
+	{
+	case(KTYPE):
+		return KT[fTokenId];
+	case(ITYPE):
+		return iTable[fTokenId];
+	case(PTYPE):
+		return PT[fTokenId];
+	case(CTYPE):
+		name[0] = '\'';
+		name[1] = cTable[fTokenId];
+		name[2] = '\'';
+		return name;
+	case(STYPE):
+		return sTable[fTokenId];
+	default:
+		*name = "number";
+		return name;
+	}
 }

@@ -52,6 +52,9 @@ int SendError(int err_id);
 //根据exprProcessed填写一个SEQUENCEARG,失败返回0
 int fillExprSeqArg(SEQARG* seqarg);
 
+// 在对应表中找到对应字符，参数：字符类型，字符ID
+char* FindToken(int fTokenType , int fTokenId);
+
 //表查询函数
 
 //在SYMBL表中查找指定名称的项, startpos表示从某个编号开始查找, 返回查找到的编号，无结果则返回-1

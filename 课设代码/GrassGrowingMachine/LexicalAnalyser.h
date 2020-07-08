@@ -25,7 +25,7 @@ typedef enum KEYWORD	//关键字种类
 typedef enum PSYMBOL	//界符种类
 {
 	pLE = 0, pGE, pEQL, pASSI, 	//<=, >=, ==, =
-	pLT, pGT, pNEQ,pADD, pSUB, //<, >, != , +, -
+	pLT, pGT, pNEQ, pADD, pSUB, //<, >, != , +, -
 	pMUL, pDIV, pMOD, pLBRACE, //*, /, %, {
 	pRBRACE, pLBRACKET, pRBRACKET, pSEMI //}, (, ), ;
 }PSYMBOL;
@@ -35,6 +35,15 @@ typedef struct TOKEN
 	TOKENTYPE type; //类型
 	int id; //编号
 }TOKEN;
+
+//关键字表
+char* KT[18];
+//关键字表的长度
+int KTSize;
+//界符表
+char* PT[17];
+//界符表的长度
+int PTSize;
 
 //当前单词
 char word[MAX_IDLEN];
