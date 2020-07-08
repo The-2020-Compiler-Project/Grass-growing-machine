@@ -1,0 +1,5 @@
+a,	itp,	gvCAT,	---,	0
+ret,	itp,	gvCAT,	---,	2
+_t0,	itp,	gvCAT,	---,	4
+_t1,	itp,	gvCAT,	---,	6
+_t2,	itp,	gvCAT,	---,	8

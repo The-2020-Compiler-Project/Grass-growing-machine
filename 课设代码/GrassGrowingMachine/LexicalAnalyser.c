@@ -21,7 +21,7 @@ int PTSize = 17;
 //初始化当前单词和单词的大小
 int initWord()
 {
-	memset(word, MAX_IDLEN * sizeof(char), 0);
+	memset(word, 0, MAX_IDLEN * sizeof(char));
 	wordSize = 0;
 	return 1;
 }
@@ -210,7 +210,7 @@ int next2(char nextChar)
 	{
 		nextState = 2;
 	}
-	else if (nextChar >= 'a' && nextChar <= 'z' && nextChar >= 'A' && nextChar <= 'Z')
+	else if ((nextChar >= 'a' && nextChar <= 'z') || (nextChar >= 'A' && nextChar <= 'Z'))
 	{
 		printf("Expecting an number or an specific identifier after %s\n", word);
 		initWord();
@@ -241,7 +241,7 @@ int next2(char nextChar)
 //确定当前状态为3时的下一个状态，参数：读到的下一个字符
 int next3(char nextChar)
 {
-	if (nextChar == '\n')
+	if (nextChar == '\n' || nextChar == '\r')
 	{
 		printf("Missing ' after %s\n", word);
 		initWord();
@@ -249,7 +249,7 @@ int next3(char nextChar)
 	}
 	else
 	{
-		nextState = 3;
+		nextState = 8;
 	}
 	return nextState;
 }
@@ -378,7 +378,7 @@ int next7(char nextChar)
 //确定当前状态为8时的下一个状态，参数：读到的下一个字符
 int next8(char nextChar)
 {
-	if (nextChar == "'")
+	if (nextChar == '\'')
 	{
 		cTfunc();
 		initWord();
