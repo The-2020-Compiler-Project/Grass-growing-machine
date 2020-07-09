@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <windows.h>
+#include <assert.h>
 
 typedef enum TOKENTYPE
 {
@@ -61,6 +63,8 @@ int pre_State;
 int initWord();
 //弹出word的最后一位字符，成功则返回1
 int wordPop();
+
+int iCurrentSrcLine; //当前所在行数
 
 //确定自动机下一状态，参数：前一状态，读到的下一个字符，返回自动机的下一状态码
 int transition(int preState, char nextChar);

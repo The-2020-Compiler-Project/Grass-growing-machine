@@ -1,10 +1,11 @@
 #include "LexicalAnalyser.h"
-#include <windows.h>
 
 //自动机当前状态
 pre_State = 0;
 //自动机下一状态
 nextState = 0;
+//当前所在行数
+int iCurrentSrcLine = 1;
 
 //关键字表
 char* KT[18] = { "int" , "char" , "real" , "program" , "function" , "var" , "args" , "val" ,
@@ -44,6 +45,7 @@ int wordPop()
 //确定自动机下一状态，参数：前一状态，读到的下一个字符，返回自动机的下一状态码
 int transition(int lastState, char nextChar)
 {
+	assert(wordSize < MAX_IDLEN);
 	if (nextChar == '\0')
 	{
 		nextState = 11;
@@ -124,7 +126,7 @@ int ToNext(int pastState, FILE* fp)
 		}
 		else
 		{
-			printf("LexicalAnalyse Completed!\n");
+			//printf("LexicalAnalyse Completed!\n");
 			return 12;
 		}
 	}
@@ -139,6 +141,7 @@ int next0(char nextChar)
 	if (nextChar == '\n' || nextChar == ' ' || nextChar == '\t')
 	{
 		initWord();
+		if (nextChar == '\n') ++iCurrentSrcLine;
 		nextState = 0;
 	}
 	else if ((nextChar >= 'A' && nextChar <= 'Z') || (nextChar >= 'a' && nextChar <= 'z'))
@@ -187,6 +190,7 @@ int next1(char nextChar)
 		wordPop();
 		KTfunc();
 		initWord();
+		if (nextChar == '\n') ++iCurrentSrcLine;
 		nextState = 0;
 	}
 	else
@@ -212,13 +216,13 @@ int next2(char nextChar)
 	}
 	else if ((nextChar >= 'a' && nextChar <= 'z') || (nextChar >= 'A' && nextChar <= 'Z'))
 	{
-		printf("Expecting an number or an specific identifier after %s\n", word);
+		printf("Expecting an number or an specific identifier after %s, line%d\n", word, iCurrentSrcLine);
 		initWord();
 		exit(-1);
 	}
 	else if (nextChar == '#')
 	{
-		printf("Expecting ';' after %s", word);
+		printf("Expecting ';' after %s, line%d\n", word, iCurrentSrcLine);
 		exit(-1);
 	}
 	else if (nextChar == ' ' || nextChar == '\n' || nextChar == '\t')
@@ -226,6 +230,7 @@ int next2(char nextChar)
 		wordPop();
 		dcTfunc();
 		initWord();
+		if (nextChar == '\n') ++iCurrentSrcLine;
 		nextState = 0;
 	}
 	else
@@ -243,7 +248,7 @@ int next3(char nextChar)
 {
 	if (nextChar == '\n' || nextChar == '\r')
 	{
-		printf("Missing ' after %s\n", word);
+		printf("Missing ' after %s, line%d\n", word, iCurrentSrcLine);
 		initWord();
 		exit(-1);
 	}
@@ -265,7 +270,7 @@ int next4(char nextChar)
 	}
 	else if (nextChar == '\n')
 	{
-		printf("Missing \" after %s\n", word);
+		printf("Missing \" after %s, line%d\n", word, iCurrentSrcLine);
 		initWord();
 		exit(-1);
 	}
@@ -290,6 +295,7 @@ int next5(char nextChar)
 		wordPop();
 		PTfunc();
 		initWord();
+		if (nextChar == '\n') ++iCurrentSrcLine;
 		nextState = 0;
 	}
 	else if ((nextChar >= '0' && nextChar <= '9'))
@@ -341,13 +347,13 @@ int next6(char nextChar)
 		nextState = 6;
 	else if ((nextChar >= 'a' && nextChar <= 'z') || (nextChar >= 'A' && nextChar <= 'Z'))
 	{
-		printf("Expecting number or an specific identifier after %s\n", word);
+		printf("Expecting number or an specific identifier after %s, line%d\n", word, iCurrentSrcLine);
 		initWord();
 		exit(-1);
 	}
 	else if (nextChar == '#')
 	{
-		printf("Expecting ';' after %s", word);
+		printf("Expecting ';' after %s, line%d", word, iCurrentSrcLine);
 		exit(-1);
 	}
 	else if (nextChar == ' ' || nextChar == '\n' || nextChar == '\t')
@@ -355,6 +361,7 @@ int next6(char nextChar)
 		wordPop();
 		KTfunc();
 		initWord();
+		if (nextChar == '\n') ++iCurrentSrcLine;
 		nextState = 0;
 	}
 	else
@@ -370,7 +377,7 @@ int next6(char nextChar)
 //确定当前状态为7时的下一个状态，参数：读到的下一个字符
 int next7(char nextChar)
 {
-	printf("Invalid Input after %s\n", word);
+	printf("Invalid Input after %s, line%d\n", word, iCurrentSrcLine);
 	initWord();
 	exit(-1);
 }
@@ -386,7 +393,7 @@ int next8(char nextChar)
 	}
 	else
 	{
-		printf("Missing ' after %s\n", word);
+		printf("Missing ' after %s, line%d\n", word, iCurrentSrcLine);
 		initWord();
 		exit(-1);
 	}
@@ -395,7 +402,7 @@ int next8(char nextChar)
 //确定当前状态为9时的下一个状态，参数：读到的下一个字符
 int next9(char nextChar)
 {
-	printf("Missing ' after %s\n", word);
+	printf("Missing ' after %s, line%d\n", word, iCurrentSrcLine);
 	initWord();
 	exit(-1);
 }
@@ -407,6 +414,7 @@ int next10(char nextChar)
 	if (nextChar == '\n')
 	{
 		initWord();
+		if (nextChar == '\n') ++iCurrentSrcLine;
 		nextState = 0;
 	}
 	else
@@ -591,7 +599,7 @@ int PTfunc()
 			return 1;
 		}
 	}
-	printf("Invalid identifier %s\n", word);
+	printf("Invalid identifier %s, line%d\n", word, iCurrentSrcLine);
 	exit(-1);
 }
 

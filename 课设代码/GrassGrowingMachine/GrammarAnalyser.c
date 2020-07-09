@@ -16,6 +16,10 @@ int GrammarAnalyse()
 	//start
 	TOKEN passTOKEN = Next();
 	passTOKEN = gProgram(passTOKEN);
+	if (passTOKEN.type == NOTYPE)
+	{
+		printf("Grammar Analysis Completed!\n");
+	}
 	return 1;
 }
 
@@ -1603,6 +1607,7 @@ TOKEN gTerm(TOKEN preTOKEN)
 
 int SendError(int err_id)
 {
+	printf("line%d,", iCurrentSrcLine);
 	switch (err_id)
 	{
 	case 1:
