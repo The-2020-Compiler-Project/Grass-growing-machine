@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "Optimizer.h"
 
+int FALG;
+
 int optimize() //ed
 {
 	//// 划分基本块 得到基本块信息表
@@ -34,6 +36,7 @@ int optimize() //ed
 	Block_Info_List* q = block_info_list;
 	while (p)
 	{
+		FLAG = 0;
 		// 将两基本块间的四元式copy
 		for (int i = q->end_pos + 1; i < p->begin_pos; i++)
 		{
@@ -175,6 +178,30 @@ int create_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list, Block_Inf
 			p->op = SequenceList[i].op;
 			p->flag = 1;
 			p->first_operand = arg1->node;
+			if (SequenceList[i].op == PARAM)
+			{
+				FALG++;
+				///???
+				int a = Find_SymblItemName(0, SequenceList[i].target.content.str);
+				PFINFLITEM* t = (PFINFLITEM*)(SYMBL[a].addr);
+				int num = t->FN;
+				ARGLITEM* r = t->PARAM;
+				a = 0;
+				for (int i = 0; i < num; i++)
+				{
+					if (r[i].cat == vnCAT)
+					{
+						a = i + 1;
+						break;
+					}
+				}
+				///???
+				if (FLAG >= a)
+				{
+					p = add_new_node_into_set(p);
+					add_seqValue_into_node(p, arg1);
+				}
+			}
 		}
 		else if (SequenceList[i].op == CALL)
 		{
@@ -373,7 +400,7 @@ int get_SeqList_from_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list)
 					}
 				}
 			}
-			else if (p->op == PUTC || p->op == RET || p->op == IF || p->op == DO || p->op == PARAM)
+			else if (p->op == PUTC || p->op == RET || p->op == IF || p->op == DO || (p->op == PARAM && !p->second_operand))
 			{
 				if (p->first_operand->seqConstant_list)
 				{
@@ -403,6 +430,17 @@ int get_SeqList_from_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list)
 				{
 					OptSeqLine--;
 					OptimizedSeqList[OptSeqLine].target = arg_info_list->arg;
+					OptSeqLine++;
+				}
+			} //换名形参赋值
+			else if (p->op == PARAM && p->second_operand)
+			{
+				if (p->second_operand->seqID_list)
+				{
+					OptimizedSeqList[OptSeqLine].op = p->op;
+					OptimizedSeqList[OptSeqLine].arg1 = p->second_operand->seqID_list->arg;
+					OptimizedSeqList[OptSeqLine].arg2.type = seqNONE;
+					OptimizedSeqList[OptSeqLine].target.type = seqNONE;
 					OptSeqLine++;
 				}
 			}

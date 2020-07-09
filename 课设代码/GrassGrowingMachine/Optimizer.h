@@ -1,6 +1,7 @@
 #pragma once
 #include<stdio.h>
 #include "SymbolList.h"
+#include "GrammarAnalyser.h"
 
 
 typedef struct Block_Info
@@ -37,7 +38,7 @@ typedef struct Arg_Info  // 存放操作数与结点的对应信息 单向链表
 	struct Arg_Info* next;
 }Arg_Info, Arg_Info_List;
 
-
+int FLAG;
 
 
 int optimize();
