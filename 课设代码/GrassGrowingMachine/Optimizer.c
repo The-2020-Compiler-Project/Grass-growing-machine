@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "Optimizer.h"
 
-int optimize()
+int optimize() //ed
 {
 	//// 划分基本块 得到基本块信息表
 	OptSeqLine = 0;
@@ -82,7 +82,7 @@ int optimize()
 	return 0;
 }
 
-int is_entrance(int pos)
+int is_entrance(int pos)  //ed
 {
 	//// 不是基本块入口 返回0; 否则返回1
 	if ((SequenceList[pos - 1].op == FUNC ||
@@ -96,16 +96,15 @@ int is_entrance(int pos)
 		SequenceList[pos - 1].op == WH ||
 		SequenceList[pos - 1].op == DO ||
 		SequenceList[pos - 1].op == WE ||
-		SequenceList[pos - 1].op == ENT) &&
+		SequenceList[pos - 1].op == ENT ||
+		SequenceList[pos].op == DO) &&
 		SequenceList[pos].op != VF &&
 		SequenceList[pos].op != VN &&
 		SequenceList[pos].op != VT &&
 		SequenceList[pos].op != CALL &&
-		SequenceList[pos].op != IF &&
 		SequenceList[pos].op != EL &&
 		SequenceList[pos].op != IE &&
 		SequenceList[pos].op != WH &&
-		SequenceList[pos].op != DO &&
 		SequenceList[pos].op != WE &&
 		SequenceList[pos].op != EXIT &&
 		SequenceList[pos].op != EF)
@@ -114,38 +113,34 @@ int is_entrance(int pos)
 		return 0;
 }
 
-int is_exit(int pos)
+int is_exit(int pos)	//ed
 {
 	//// 是基本块出口 返回1; 否则返回0;
 	if ((SequenceList[pos + 1].op == EXIT ||
 		SequenceList[pos + 1].op == EF ||
-		SequenceList[pos + 1].op == IF ||
 		SequenceList[pos + 1].op == EL ||
+		SequenceList[pos + 1].op == WE ||
 		SequenceList[pos + 1].op == IE ||
-		SequenceList[pos + 1].op == WE ||
-		SequenceList[pos + 1].op == DO ||
-		SequenceList[pos + 1].op == WE ||
-		SequenceList[pos + 1].op == CALL ||
-		SequenceList[pos + 1].op == PARAM) &&
+		SequenceList[pos + 1].op == WH ||
+		SequenceList[pos].op == IF ||
+		SequenceList[pos].op == DO ||
+		SequenceList[pos].op == CALL) &&
 		SequenceList[pos].op != ENT &&
 		SequenceList[pos].op != FUNC &&
-		SequenceList[pos].op != IF &&
 		SequenceList[pos].op != EL &&
 		SequenceList[pos].op != IE &&
 		SequenceList[pos].op != WH &&
-		SequenceList[pos].op != DO &&
 		SequenceList[pos].op != WE &&
 		SequenceList[pos].op != VT &&
 		SequenceList[pos].op != VF &&
 		SequenceList[pos].op != VN &&
-		SequenceList[pos].op != CALL &&
 		SequenceList[pos].op != PARAM)
 		return 1;
 	else
 		return 0;
 }
 
-int create_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list, Block_Info_List* block_info)
+int create_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list, Block_Info_List* block_info) //ed
 {
 	//// 创建DAG图
 	// 指针p:用于访问当前结点集的尾元素
@@ -167,12 +162,28 @@ int create_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list, Block_Inf
 			else
 				add_seqValue_into_node(arg1->node, target);
 		}
-		else if (SequenceList[i].op == RET || SequenceList[i].op == PUTC)
+		else if (SequenceList[i].op == RET || SequenceList[i].op == PUTC ||
+			SequenceList[i].op == IF || SequenceList[i].op == DO || SequenceList[i].op == PARAM)
 		{
 			Arg_Info* arg1 = get_arg_info_from_list(SequenceList[i].arg1, arg_info_list);
+			if (!arg1->node)
+			{
+				p = add_new_node_into_set(p);
+				add_seqValue_into_node(p, arg1);
+			}
 			p = add_new_node_into_set(p);
 			p->op = SequenceList[i].op;
+			p->flag = 1;
 			p->first_operand = arg1->node;
+		}
+		else if (SequenceList[i].op == CALL)
+		{
+			Arg_Info* arg1 = get_arg_info_from_list(SequenceList[i].target, arg_info_list);
+			arg_info_list->arg = SequenceList[i].arg1;
+			p = add_new_node_into_set(p);
+			p->op = CALL;
+			p->flag = 1;
+			add_seqValue_into_node(p, arg1);
 		}
 		else
 		{
@@ -206,7 +217,7 @@ int create_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list, Block_Inf
 	return 0;
 }
 
-int reorganize_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list)
+int reorganize_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list) //ing
 {
 	//// 处理DAG图中的细节 1：计算常量表达式 2: 判断结点有效状况
 	// 1：计算常量表达式
@@ -228,19 +239,32 @@ int reorganize_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list)
 						p->next->seqConstant_list->arg.type = p1->seqConstant_list->arg.type;
 						switch (p->next->op)
 						{
-						case ADD:p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d + p2->seqConstant_list->arg.content.d); break;
-						case SUB:p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d - p2->seqConstant_list->arg.content.d); break;
-						case MUL:p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d * p2->seqConstant_list->arg.content.d); break;
-						case DIV:p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d / p2->seqConstant_list->arg.content.d); break;
-						case MOD:p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d % p2->seqConstant_list->arg.content.d); break;
-						case GT: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d > p2->seqConstant_list->arg.content.d); break;
-						case GE: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d >= p2->seqConstant_list->arg.content.d); break;
-						case LT: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d < p2->seqConstant_list->arg.content.d); break;
-						case LE: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d <= p2->seqConstant_list->arg.content.d); break;
-						case EQ: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d == p2->seqConstant_list->arg.content.d); break;
-						case NE: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d != p2->seqConstant_list->arg.content.d); break;
-						case AND:p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d && p2->seqConstant_list->arg.content.d); break;
-						case OR: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d || p2->seqConstant_list->arg.content.d); break;
+						case ADD:p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d + p2->seqConstant_list->arg.content.d);
+							p->next->seqConstant_list->arg.type = p1->seqConstant_list->arg.type; break;
+						case SUB:p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d - p2->seqConstant_list->arg.content.d); 
+							p->next->seqConstant_list->arg.type = p1->seqConstant_list->arg.type; break;
+						case MUL:p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d * p2->seqConstant_list->arg.content.d); 
+							p->next->seqConstant_list->arg.type = p1->seqConstant_list->arg.type; break;
+						case DIV:p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d / p2->seqConstant_list->arg.content.d);
+							p->next->seqConstant_list->arg.type = p1->seqConstant_list->arg.type; break;
+						case MOD:p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d % p2->seqConstant_list->arg.content.d);
+							p->next->seqConstant_list->arg.type = p1->seqConstant_list->arg.type; break;
+						case GT: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d > p2->seqConstant_list->arg.content.d);
+							p->next->seqConstant_list->arg.type = seqDC; break;
+						case GE: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d >= p2->seqConstant_list->arg.content.d);
+							p->next->seqConstant_list->arg.type = seqDC; break;
+						case LT: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d < p2->seqConstant_list->arg.content.d);
+							p->next->seqConstant_list->arg.type = seqDC; break;
+						case LE: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d <= p2->seqConstant_list->arg.content.d);
+							p->next->seqConstant_list->arg.type = seqDC; break;
+						case EQ: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d == p2->seqConstant_list->arg.content.d);
+							p->next->seqConstant_list->arg.type = seqDC; break;
+						case NE: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d != p2->seqConstant_list->arg.content.d);
+							p->next->seqConstant_list->arg.type = seqDC; break;
+						case AND:p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d && p2->seqConstant_list->arg.content.d);
+							p->next->seqConstant_list->arg.type = seqDC; break;
+						case OR: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.d || p2->seqConstant_list->arg.content.d);
+							p->next->seqConstant_list->arg.type = seqDC; break;
 						}
 					}
 					if (p1->seqConstant_list->arg.type == seqFC)
@@ -248,18 +272,30 @@ int reorganize_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list)
 						p->next->seqConstant_list->arg.type = seqFC;
 						switch (p->next->op)
 						{
-						case ADD:p->next->seqConstant_list->arg.content.f = (p1->seqConstant_list->arg.content.f + p2->seqConstant_list->arg.content.f); break;
-						case SUB:p->next->seqConstant_list->arg.content.f = (p1->seqConstant_list->arg.content.f - p2->seqConstant_list->arg.content.f); break;
-						case MUL:p->next->seqConstant_list->arg.content.f = (p1->seqConstant_list->arg.content.f * p2->seqConstant_list->arg.content.f); break;
-						case DIV:p->next->seqConstant_list->arg.content.f = (p1->seqConstant_list->arg.content.f / p2->seqConstant_list->arg.content.f); break;
-						case GT: p->next->seqConstant_list->arg.content.f = (p1->seqConstant_list->arg.content.f > p2->seqConstant_list->arg.content.f); break;
-						case GE: p->next->seqConstant_list->arg.content.f = (p1->seqConstant_list->arg.content.f >= p2->seqConstant_list->arg.content.f); break;
-						case LT: p->next->seqConstant_list->arg.content.f = (p1->seqConstant_list->arg.content.f < p2->seqConstant_list->arg.content.f); break;
-						case LE: p->next->seqConstant_list->arg.content.f = (p1->seqConstant_list->arg.content.f <= p2->seqConstant_list->arg.content.f); break;
-						case EQ: p->next->seqConstant_list->arg.content.f = (p1->seqConstant_list->arg.content.f == p2->seqConstant_list->arg.content.f); break;
-						case NE: p->next->seqConstant_list->arg.content.f = (p1->seqConstant_list->arg.content.f != p2->seqConstant_list->arg.content.f); break;
-						case AND:p->next->seqConstant_list->arg.content.f = (p1->seqConstant_list->arg.content.f && p2->seqConstant_list->arg.content.f); break;
-						case OR: p->next->seqConstant_list->arg.content.f = (p1->seqConstant_list->arg.content.f || p2->seqConstant_list->arg.content.f); break;
+						case ADD:p->next->seqConstant_list->arg.content.f = (p1->seqConstant_list->arg.content.f + p2->seqConstant_list->arg.content.f);
+							p->next->seqConstant_list->arg.type = seqFC; break;
+						case SUB:p->next->seqConstant_list->arg.content.f = (p1->seqConstant_list->arg.content.f - p2->seqConstant_list->arg.content.f);
+							p->next->seqConstant_list->arg.type = seqFC; break;
+						case MUL:p->next->seqConstant_list->arg.content.f = (p1->seqConstant_list->arg.content.f * p2->seqConstant_list->arg.content.f);
+							p->next->seqConstant_list->arg.type = seqFC; break;
+						case DIV:p->next->seqConstant_list->arg.content.f = (p1->seqConstant_list->arg.content.f / p2->seqConstant_list->arg.content.f);
+							p->next->seqConstant_list->arg.type = seqFC; break;
+						case GT: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.f > p2->seqConstant_list->arg.content.f);
+							p->next->seqConstant_list->arg.type = seqDC; break;
+						case GE: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.f >= p2->seqConstant_list->arg.content.f);
+							p->next->seqConstant_list->arg.type = seqDC; break;
+						case LT: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.f < p2->seqConstant_list->arg.content.f);
+							p->next->seqConstant_list->arg.type = seqDC; break;
+						case LE: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.f <= p2->seqConstant_list->arg.content.f);
+							p->next->seqConstant_list->arg.type = seqDC; break;
+						case EQ: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.f == p2->seqConstant_list->arg.content.f);
+							p->next->seqConstant_list->arg.type = seqDC; break;
+						case NE: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.f != p2->seqConstant_list->arg.content.f);
+							p->next->seqConstant_list->arg.type = seqDC; break;
+						case AND:p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.f && p2->seqConstant_list->arg.content.f);
+							p->next->seqConstant_list->arg.type = seqDC; break;
+						case OR: p->next->seqConstant_list->arg.content.d = (p1->seqConstant_list->arg.content.f || p2->seqConstant_list->arg.content.f);
+							p->next->seqConstant_list->arg.type = seqDC; break;
 						}
 					}
 				}
@@ -273,7 +309,7 @@ int reorganize_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list)
 	Arg_Info* q = arg_info_list->next;
 	while (q)
 	{
-		if (is_seqID(q->arg) || q->node->op == RET || q->node->op == PUTC)
+		if (is_seqID(q->arg))
 		{
 			q->node->flag = 1;
 		}
@@ -284,7 +320,7 @@ int reorganize_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list)
 	return 0;
 }
 
-int get_SeqList_from_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list)
+int get_SeqList_from_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list)//ed
 {
 	//// 生成四元式
 	Node* p = node_set->next;
@@ -315,41 +351,71 @@ int get_SeqList_from_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list)
 						while (q)
 						{
 							OptimizedSeqList[OptSeqLine].op = ASSI;
+							OptimizedSeqList[OptSeqLine].arg1 =  p->seqMIDVAR_list->arg;
+							OptimizedSeqList[OptSeqLine].arg2.type = seqNONE;
+							OptimizedSeqList[OptSeqLine].target = p->seqID_list->arg;
+							OptSeqLine++;
+							q = q->next;
+						}
+					}
+					else if (p->seqID_list->next)
+					{
+						Arg_List* q = p->seqID_list->next;
+						while (q)
+						{
+							OptimizedSeqList[OptSeqLine].op = ASSI;
 							OptimizedSeqList[OptSeqLine].arg1 = p->seqID_list->arg;
 							OptimizedSeqList[OptSeqLine].arg2.type = seqNONE;
-							OptimizedSeqList[OptSeqLine].target = p->seqMIDVAR_list->arg;
+							OptimizedSeqList[OptSeqLine].target = q->arg;
 							OptSeqLine++;
 							q = q->next;
 						}
 					}
 				}
 			}
-			else if (p->op == PUTC || p->op == RET)
+			else if (p->op == PUTC || p->op == RET || p->op == IF || p->op == DO || p->op == PARAM)
 			{
-				if (p->seqConstant_list)
+				if (p->first_operand->seqConstant_list)
 				{
 					OptimizedSeqList[OptSeqLine].op = p->op;
-					OptimizedSeqList[OptSeqLine].arg1 = p->seqConstant_list->arg;
+					OptimizedSeqList[OptSeqLine].arg1 = p->first_operand->seqConstant_list->arg;
 					OptimizedSeqList[OptSeqLine].arg2.type = seqNONE;
 					OptimizedSeqList[OptSeqLine].target.type = seqNONE;
 					OptSeqLine++;
 				}
-				else if (p->seqID_list)
+				else if (p->first_operand->seqID_list)
 				{
 					OptimizedSeqList[OptSeqLine].op = p->op;
-					OptimizedSeqList[OptSeqLine].arg1 = p->seqID_list->arg;
+					OptimizedSeqList[OptSeqLine].arg1 = p->first_operand->seqID_list->arg;
 					OptimizedSeqList[OptSeqLine].arg2.type = seqNONE;
 					OptimizedSeqList[OptSeqLine].target.type = seqNONE;
 					OptSeqLine++;
 				}
+				else if (p->first_operand->seqMIDVAR_list)
+				{
+					OptimizedSeqList[OptSeqLine].op = p->op;
+					OptimizedSeqList[OptSeqLine].arg1 = p->first_operand->seqMIDVAR_list->arg;
+					OptimizedSeqList[OptSeqLine].arg2.type = seqNONE;
+					OptimizedSeqList[OptSeqLine].target.type = seqNONE;
+					OptSeqLine++;
+				}
+				if (p->op == PARAM)
+				{
+					OptSeqLine--;
+					OptimizedSeqList[OptSeqLine].target = arg_info_list->arg;
+					OptSeqLine++;
+				}
+			}
+			else if (p->op == CALL)
+			{
+				OptimizedSeqList[OptSeqLine].op = p->op;
+				OptimizedSeqList[OptSeqLine].arg1 = arg_info_list->arg;
+				OptimizedSeqList[OptSeqLine].arg2.type = seqNONE;
+				if (p->seqID_list)
+					OptimizedSeqList[OptSeqLine].target = p->seqID_list->arg;
 				else if (p->seqMIDVAR_list)
-				{
-					OptimizedSeqList[OptSeqLine].op = p->op;
-					OptimizedSeqList[OptSeqLine].arg1 = p->seqMIDVAR_list->arg;
-					OptimizedSeqList[OptSeqLine].arg2.type = seqNONE;
-					OptimizedSeqList[OptSeqLine].target.type = seqNONE;
-					OptSeqLine++;
-				}
+					OptimizedSeqList[OptSeqLine].target = p->seqMIDVAR_list->arg;
+				OptSeqLine++;
 			}
 			else
 			{
@@ -397,7 +463,7 @@ int get_SeqList_from_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list)
 	}
 }
 
-int set_active_info(int start, Arg_Info_List* arg_info_list)
+int set_active_info(int start, Arg_Info_List* arg_info_list)  //ed
 {
 	//// 填写活跃信息
 	// 初始化
@@ -419,10 +485,18 @@ int set_active_info(int start, Arg_Info_List* arg_info_list)
 			OptimizedSeqList[i].target.active = get_active_info_from_list(OptimizedSeqList[i].target, arg_info_list);
 			revise_active_info_list(OptimizedSeqList[i].target, arg_info_list, 0);
 		}
-		else if (OptimizedSeqList[i].op == PUTC || OptimizedSeqList[i].op == RET)
+		else if (OptimizedSeqList[i].op == PUTC || OptimizedSeqList[i].op == RET ||
+			OptimizedSeqList[i].op == IF || OptimizedSeqList[i].op == DO || OptimizedSeqList[i].op == PARAM)
 		{
 			OptimizedSeqList[i].arg1.active = get_active_info_from_list(OptimizedSeqList[i].arg1, arg_info_list);
 			revise_active_info_list(OptimizedSeqList[i].arg1, arg_info_list, 1);
+			if (OptimizedSeqList[i].op == PARAM)
+				OptimizedSeqList[i].target.active = 1;
+		}
+		else if (OptimizedSeqList[i].op == CALL)
+		{
+			OptimizedSeqList[i].arg1.active = 0;
+			OptimizedSeqList[i].target.active = 1;
 		}
 		else
 		{
@@ -470,7 +544,7 @@ Arg_Info* get_arg_info_from_list(SEQARG arg, Arg_Info_List* arg_info_list)
 	Arg_Info* p = arg_info_list;
 	while (p->next)
 	{
-		if (p->next->arg.type == arg.type && p->next->arg.content.f == arg.content.f)
+		if (equ_arg(p->next->arg, arg))
 		{
 			return p->next;
 		}
@@ -536,20 +610,22 @@ int add_seqValue_into_node(Node* node, Arg_Info* arg_info)
 	}	// 增加标识符到结点 同时删除其他结点中的该标识符 同时修改参数信息
 	else if (is_seqID(arg_info->arg))
 	{
+		/*
 		if (arg_info->node)
 		{
 			Arg_List* p = arg_info->node->seqID_list;
 			Arg_List* q = p;
-			if (p->arg.type == (arg_info->arg).type && !strcmp(p->arg.content.str, (arg_info->arg).content.str))
+			if (!strcmp(p->arg.content.str, (arg_info->arg).content.str))
 			{
 				arg_info->node->seqID_list = p->next;
 				free(p);
+				p = NULL;
 			}
 			else
 			{
 				while (p)
 				{
-					if (p->arg.type == (arg_info->arg).type && !strcmp(p->arg.content.str, (arg_info->arg).content.str))
+					if (!strcmp(p->arg.content.str, (arg_info->arg).content.str))
 					{
 						q->next = p->next;
 						free(p);
@@ -560,6 +636,7 @@ int add_seqValue_into_node(Node* node, Arg_Info* arg_info)
 				}
 			}
 		}
+		*/
 		arg_info->node = node;
 		Arg_List* p = node->seqID_list;
 		if (!p)
@@ -606,7 +683,7 @@ Node* search_parent_node(Arg_Info* arg1_info, Arg_Info* arg2_info, OPR op, Node_
 	return NULL;
 }
 
-int set_flag(Node_Set* last_node, Arg_Info_List* arg_info_list)
+int set_flag(Node_Set* last_node, Arg_Info_List* arg_info_list) //ed
 {
 	// 从结点集尾开始 从后往前 设置 有效的结点的操作数结点的 有效情况
 	Node* p = last_node;
@@ -637,7 +714,7 @@ SEQARG get_value_of_node(Node* node)
 	}
 }
 
-int set_operand_flag_1(Node* node)
+int set_operand_flag_1(Node* node) //ed
 {
 	if (!node->seqConstant_list)
 	{
@@ -660,7 +737,7 @@ bool get_active_info_from_list(SEQARG arg, Arg_Info_List* arg_info_list)
 	Arg_Info* p = arg_info_list->next;
 	while (p)
 	{
-		if (p->arg.type == arg.type && p->arg.content.f == arg.content.f)
+		if (equ_arg(p->arg, arg))
 			return p->arg.active;
 		p = p->next;
 	}
@@ -672,7 +749,7 @@ int revise_active_info_list(SEQARG arg, Arg_Info_List* arg_info_list, bool activ
 	Arg_Info* p = arg_info_list->next;
 	while (p)
 	{
-		if (p->arg.type == arg.type && p->arg.content.f == arg.content.f)
+		if (equ_arg(p->arg, arg))
 		{
 			p->arg.active = active;
 			return 0;
@@ -697,3 +774,28 @@ int is_seqID(SEQARG arg)
 	else
 		return 0;
 }
+
+int equ_arg(SEQARG arg1, SEQARG arg2)
+{
+	if (arg1.type == arg2.type)
+	{
+		switch (arg1.type)
+		{
+		case seqNONE:return 0;
+		case seqDC: if (arg1.content.d == arg2.content.d) return 1;
+				  else return 0;
+		case seqFC: if (arg1.content.f == arg2.content.f) return 1;
+				  else return 0;
+		case seqCHAR: if (arg1.content.ch == arg2.content.ch) return 1;
+					else return 0;
+		case seqID: if (!strcmp(arg1.content.str, arg2.content.str)) return 1;
+				  else return 0;
+		}
+	}
+	else
+		return 0;
+}
+
+/*
+int Find_SymblItemName(int startpos, char* name);
+*/

@@ -59,3 +59,4 @@ bool get_active_info_from_list(SEQARG arg, Arg_Info_List* arg_info_list);
 int revise_active_info_list(SEQARG arg, Arg_Info_List* arg_info_list, bool active);
 int is_seqMIDVAR(SEQARG arg);
 int is_seqID(SEQARG arg);
+int equ_arg(SEQARG arg1, SEQARG arg2);
