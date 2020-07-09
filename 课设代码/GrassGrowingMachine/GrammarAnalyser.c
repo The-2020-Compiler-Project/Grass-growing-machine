@@ -95,8 +95,6 @@ int getAvailableVar(char* name)
 int getCurrentFuncVar(char* name)
 {
 	int found = -1;
-	int foundgv = -1;	//全局变量
-	int foundfuncv = -1; //函数变量
 	if (currentFunc == NULL) return -1;
 	do
 	{
@@ -114,6 +112,10 @@ int getCurrentFuncVar(char* name)
 				{
 					return found;
 				}
+			}
+			else if (SYMBL[found].cat == fCAT)
+			{
+				return -2;
 			}
 		}
 	} while (found != -1);
@@ -1043,6 +1045,11 @@ TOKEN gCodeAssign(TOKEN preTOKEN)
 		int iNameIdToCheck = passTOKEN.id;
 		strcpy(strNameToCheck, iTable[iNameIdToCheck]);
 		int check_symblID = Find_SymblItemName(0, strNameToCheck);
+		if (check_symblID == -1)
+		{
+			printf("%s:", strNameToCheck);
+			SendError(39);
+		}
 		if (SYMBL[check_symblID].cat == fCAT) //规定函数名与变量名不相同
 		{
 			int func_symblID = check_symblID;
@@ -1322,12 +1329,18 @@ TOKEN gCodeCall(TOKEN preTOKEN)
 		SendError(30);
 	}
 	passTOKEN = Next();
+	int iCurrentParamNum = 0; //已经传参的个数
 	while (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACKET))
 	{
 		//传参
 		passTOKEN = gExpr(passTOKEN);
 		SEQUENCE seq = { PARAM, {seqNONE, 0, true}, {seqNONE, 0, false}, {seqID, iTable[funcnameid], true} };
 		fillExprSeqArg(&seq.arg1);
+		//检查参数类型是否匹配
+		/*if (seq.arg1.type != exprProcessed.datatype)
+		{
+			printf()
+		}*/
 		sendSequence(seq);
 		exprProcessed.type = exprNULL;
 		if (!(passTOKEN.type == PTYPE && passTOKEN.id == pSEMI))
@@ -1336,6 +1349,7 @@ TOKEN gCodeCall(TOKEN preTOKEN)
 			printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
 			SendError(10);
 		}
+		++iCurrentParamNum;
 		passTOKEN = Next();
 	}
 	passTOKEN = Next();
@@ -1607,7 +1621,7 @@ TOKEN gTerm(TOKEN preTOKEN)
 
 int SendError(int err_id)
 {
-	printf("line%d,", iCurrentSrcLine);
+	printf("line%d附近,", iCurrentSrcLine);
 	switch (err_id)
 	{
 	case 1:

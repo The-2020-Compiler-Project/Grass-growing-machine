@@ -359,7 +359,7 @@ int next6(char nextChar)
 	else if (nextChar == ' ' || nextChar == '\n' || nextChar == '\t')
 	{
 		wordPop();
-		KTfunc();
+		fcTfunc();
 		initWord();
 		if (nextChar == '\n') ++iCurrentSrcLine;
 		nextState = 0;
@@ -377,7 +377,7 @@ int next6(char nextChar)
 //确定当前状态为7时的下一个状态，参数：读到的下一个字符
 int next7(char nextChar)
 {
-	printf("Invalid Input after %s, line%d\n", word, iCurrentSrcLine);
+	printf("Invalid Input after '%s', line%d\n", word, iCurrentSrcLine);
 	initWord();
 	exit(-1);
 }
@@ -599,7 +599,7 @@ int PTfunc()
 			return 1;
 		}
 	}
-	printf("Invalid identifier %s, line%d\n", word, iCurrentSrcLine);
+	printf("Invalid identifier '%s', line%d\n", word, iCurrentSrcLine);
 	exit(-1);
 }
 
