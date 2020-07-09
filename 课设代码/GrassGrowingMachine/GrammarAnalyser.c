@@ -1334,6 +1334,12 @@ TOKEN gCodeCall(TOKEN preTOKEN)
 	while (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACKET))
 	{
 		//传参
+		//检查传参个数
+		if (iCurrentParamNum >= ((PFINFLITEM*)SYMBL[func_SYMBLID].addr)->FN)
+		{
+			//error
+			SendError(42);
+		}
 		passTOKEN = gExpr(passTOKEN);
 		SEQUENCE seq = { PARAM, {seqNONE, 0, true}, {seqNONE, 0, false}, {seqID, iTable[funcnameid], true} };
 		fillExprSeqArg(&seq.arg1);
@@ -1354,6 +1360,7 @@ TOKEN gCodeCall(TOKEN preTOKEN)
 		++iCurrentParamNum;
 		passTOKEN = Next();
 	}
+	//检查传参个数
 	if (iCurrentParamNum != ((PFINFLITEM*)SYMBL[func_SYMBLID].addr)->FN)
 	{
 		//error
