@@ -5,6 +5,7 @@
 #include "LexicalAnalyser.h"
 #include "GrammarAnalyser.h"
 #include "DestGenerator.h"
+#include "Optimizer.h"
 
 const int DEBUG = 0;
 
@@ -48,9 +49,9 @@ int main(char argc, char* argv[])
     printf("文件读取成功\n");
     //此处以后可以进行文件的读取操作测试等
 
-    FILE* seqfile = fopen("Hello_Sequence.txt", "w");
+    FILE* seqfile = fopen("D:/Hello_Sequence.txt", "w");
     if (!seqfile) return -1;
-    FILE* symfile = fopen("Hello_SYMBL.txt", "w");
+    FILE* symfile = fopen("D:/Hello_SYMBL.txt", "w");
     if (!symfile) return -1;
 
     //TOKEN newtoken;
@@ -60,7 +61,9 @@ int main(char argc, char* argv[])
     //}
 
     GrammarAnalyse();
+    //optimize();
     Output_SeqList(SequenceList, SeqLine, seqfile);
+   
     Output_SYMBL(symfile);
     fclose(seqfile);
     fclose(symfile);
