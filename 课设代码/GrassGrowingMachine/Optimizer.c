@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "Optimizer.h"
 
-int FALG;
+//int FLAG;
 
 int optimize() //ed
 {
@@ -156,6 +156,17 @@ int create_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list, Block_Inf
 		{
 			Arg_Info* arg1 = get_arg_info_from_list(SequenceList[i].arg1, arg_info_list);
 			Arg_Info* target = get_arg_info_from_list(SequenceList[i].target, arg_info_list);
+			int flag;
+			if (arg1->node && is_seqID(arg1->arg) && !equ_arg(arg1->node->seqID_list->arg, arg1->arg))
+				flag = 1;
+			else
+				flag = 0;
+			if (flag)
+			{
+				p = add_new_node_into_set(p);
+				p->flag = 1;
+				add_seqValue_into_node(p, arg1);
+			}
 			if (!arg1->node)
 			{
 				p = add_new_node_into_set(p);
@@ -164,6 +175,7 @@ int create_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list, Block_Inf
 			}
 			else
 				add_seqValue_into_node(arg1->node, target);
+			
 		}
 		else if (SequenceList[i].op == RET || SequenceList[i].op == PUTC ||
 			SequenceList[i].op == IF || SequenceList[i].op == DO || SequenceList[i].op == PARAM)
@@ -180,7 +192,8 @@ int create_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list, Block_Inf
 			p->first_operand = arg1->node;
 			if (SequenceList[i].op == PARAM)
 			{
-				FALG++;
+				Node* q = p;
+				FLAG++;
 				///???
 				int a = Find_SymblItemName(0, SequenceList[i].target.content.str);
 				PFINFLITEM* t = (PFINFLITEM*)(SYMBL[a].addr);
@@ -200,6 +213,7 @@ int create_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list, Block_Inf
 				{
 					p = add_new_node_into_set(p);
 					add_seqValue_into_node(p, arg1);
+					q->second_operand = p;
 				}
 			}
 		}
@@ -333,12 +347,12 @@ int reorganize_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list) //ing
 	// 此时指针p指向结点集 尾元素
 
 	// 含标识符的结点必有效
-	Arg_Info* q = arg_info_list->next;
+	Node* q = node_set->next;
 	while (q)
 	{
-		if (is_seqID(q->arg))
+		if (q->seqID_list)
 		{
-			q->node->flag = 1;
+			q->flag = 1;
 		}
 		q = q->next;
 	}
@@ -440,7 +454,7 @@ int get_SeqList_from_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list)
 					OptimizedSeqList[OptSeqLine].op = p->op;
 					OptimizedSeqList[OptSeqLine].arg1 = p->second_operand->seqID_list->arg;
 					OptimizedSeqList[OptSeqLine].arg2.type = seqNONE;
-					OptimizedSeqList[OptSeqLine].target.type = seqNONE;
+					OptimizedSeqList[OptSeqLine].target = arg_info_list->arg;
 					OptSeqLine++;
 				}
 			}
