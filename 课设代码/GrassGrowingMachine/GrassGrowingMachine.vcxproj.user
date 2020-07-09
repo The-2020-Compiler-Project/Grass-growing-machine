@@ -2,11 +2,16 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerDebuggerType>NativeOnly</LocalDebuggerDebuggerType>
-    <LocalDebuggerCommandArguments>D:\C++\Practise\ASM\masm\code\new.ggml D:\C++\Practise\ASM\masm\code\new.asm</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>F:\Hello.ggml F:\Hello.asm</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerCommandArguments>Hello.ggml D:/Hello.asm</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LocalDebuggerCommandArguments>C:\Users\HP\Desktop\Hello.ggml</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerDebuggerType>NativeOnly</LocalDebuggerDebuggerType>
   </PropertyGroup>
 </Project>
