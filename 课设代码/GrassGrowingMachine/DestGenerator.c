@@ -1267,6 +1267,7 @@ int sub_WE(SEQUENCE Seq)
 	Reg_ST();
 	buffptr += sprintf(buffptr, "\tJMP _WH%d\n", WHILE_Stack[WHILE_SP - 1]);
 	buffptr += sprintf(buffptr, "_WE%d:\tNOP\n", WHILE_Stack[WHILE_SP - 1]);
+	WHILE_Pop();
 	return 1;
 }
 

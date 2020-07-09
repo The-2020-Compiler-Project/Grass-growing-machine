@@ -61,13 +61,14 @@ int main(char argc, char* argv[])
     //}
 
     GrammarAnalyse();
-    //optimize();
-    Output_SeqList(SequenceList, SeqLine, seqfile);
+    optimize();
+    //Output_SeqList(OptimizedSeqList, OptSeqLine, seqfile);
    
     Output_SYMBL(symfile);
     fclose(seqfile);
     fclose(symfile);
-    DestGenerator(SequenceList, SeqLine, dstfile);
+    DestGenerator(OptimizedSeqList, OptSeqLine, dstfile);
+    //DestGenerator(SequenceList, SeqLine, dstfile);
     return 0;
  }
 
