@@ -5,6 +5,8 @@
 #include "LexicalAnalyser.h"
 #include "GrammarAnalyser.h"
 #include "DestGenerator.h"
+#include "Optimizer.h"
+
 
 const int DEBUG = 0;
 
@@ -60,7 +62,9 @@ int main(char argc, char* argv[])
     //}
 
     GrammarAnalyse();
+    optimize();
     Output_SeqList(SequenceList, SeqLine, seqfile);
+   
     Output_SYMBL(symfile);
     fclose(seqfile);
     fclose(symfile);
