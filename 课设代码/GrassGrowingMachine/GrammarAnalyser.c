@@ -574,6 +574,11 @@ TOKEN gFuncDef(TOKEN preTOKEN)
 	++SymblLine;
 	passTOKEN = Next();
 	passTOKEN = gDeclArgs(passTOKEN);
+	//记录至函数信息表
+	PFINFL[PFInflLine].PARAM = ptrFirstArg;
+	PFINFL[PFInflLine].LEVEL = 1;
+	PFINFL[PFInflLine].FN = iArgNum;
+	PFINFL[PFInflLine].ENTRY = 0;
 	passTOKEN = gDeclFuncVars(passTOKEN);
 	passTOKEN = gFuncBody(passTOKEN);
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pRBRACE))
@@ -582,11 +587,6 @@ TOKEN gFuncDef(TOKEN preTOKEN)
 		printf("%s前:", FindToken(passTOKEN.type, passTOKEN.id));
 		SendError(16);
 	}
-	//记录至函数信息表
-	PFINFL[PFInflLine].LEVEL = 1;
-	PFINFL[PFInflLine].FN = iArgNum;
-	PFINFL[PFInflLine].ENTRY = 0;
-	PFINFL[PFInflLine].PARAM = ptrFirstArg;
 	SYMBL[curFuncSymblLine].OFFSET = PFINFL[PFInflLine].OFFSET; //回填区距
 	++PFInflLine;
 	//生成四元式
@@ -1321,6 +1321,7 @@ TOKEN gCodeCall(TOKEN preTOKEN)
 		SendError(9);
 	}
 	int funcnameid = passTOKEN.id;
+	int func_SYMBLID = Find_SymblItemName(0, iTable[funcnameid]); //调用的函数在符号表中的编号
 	passTOKEN = Next();
 	if (!(passTOKEN.type == PTYPE && passTOKEN.id == pLBRACKET))
 	{
@@ -1337,10 +1338,11 @@ TOKEN gCodeCall(TOKEN preTOKEN)
 		SEQUENCE seq = { PARAM, {seqNONE, 0, true}, {seqNONE, 0, false}, {seqID, iTable[funcnameid], true} };
 		fillExprSeqArg(&seq.arg1);
 		//检查参数类型是否匹配
-		/*if (seq.arg1.type != exprProcessed.datatype)
+		if (exprProcessed.datatype != ((PFINFLITEM *)SYMBL[func_SYMBLID].addr)->PARAM[iCurrentParamNum].type)
 		{
-			printf()
-		}*/
+			//error
+			SendError(41);
+		}
 		sendSequence(seq);
 		exprProcessed.type = exprNULL;
 		if (!(passTOKEN.type == PTYPE && passTOKEN.id == pSEMI))
@@ -1351,6 +1353,11 @@ TOKEN gCodeCall(TOKEN preTOKEN)
 		}
 		++iCurrentParamNum;
 		passTOKEN = Next();
+	}
+	if (iCurrentParamNum != ((PFINFLITEM*)SYMBL[func_SYMBLID].addr)->FN)
+	{
+		//error
+		SendError(42);
 	}
 	passTOKEN = Next();
 	return passTOKEN;
@@ -1743,6 +1750,12 @@ int SendError(int err_id)
 		break;
 	case 40:
 		printf("未定义的项类型\n");
+		break;
+	case 41:
+		printf("函数传参类型不匹配\n");
+		break;
+	case 42:
+		printf("函数传参数目不匹配\n");
 		break;
 	default:
 		printf("未定义的错误类型\n");
