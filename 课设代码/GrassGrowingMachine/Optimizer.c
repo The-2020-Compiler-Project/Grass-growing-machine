@@ -156,17 +156,23 @@ int create_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list, Block_Inf
 		{
 			Arg_Info* arg1 = get_arg_info_from_list(SequenceList[i].arg1, arg_info_list);
 			Arg_Info* target = get_arg_info_from_list(SequenceList[i].target, arg_info_list);
-			int flag;
-			if (arg1->node && is_seqID(arg1->arg) && !equ_arg(arg1->node->seqID_list->arg, arg1->arg))
-				flag = 1;
-			else
-				flag = 0;
+			/////
+			int flag = 0; //是否需要新建结点
+			if (arg1->node && !(arg1->arg.type == seqCHAR || arg1->arg.type == seqFC || arg1->arg.type == seqDC))
+			{
+				if (arg1->node->seqID_list && arg1->node->seqMIDVAR_list)
+					flag = 1;
+				if (arg1->node->seqID_list && arg1->node->seqID_list->next)
+					flag = 1;
+				if (arg1->node->seqMIDVAR_list && arg1->node->seqMIDVAR_list->next)
+					flag = 1;
+			}
 			if (flag)
 			{
 				p = add_new_node_into_set(p);
-				p->flag = 1;
 				add_seqValue_into_node(p, arg1);
 			}
+			/////
 			if (!arg1->node)
 			{
 				p = add_new_node_into_set(p);
@@ -209,7 +215,7 @@ int create_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list, Block_Inf
 					}
 				}
 				///???
-				if (FLAG >= a)
+				if (FLAG >= a && a != 0)
 				{
 					p = add_new_node_into_set(p);
 					add_seqValue_into_node(p, arg1);
@@ -378,11 +384,15 @@ int get_SeqList_from_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list)
 						Arg_List* q = p->seqID_list;
 						while (q)
 						{
-							OptimizedSeqList[OptSeqLine].op = ASSI;
-							OptimizedSeqList[OptSeqLine].arg1 = p->seqConstant_list->arg;
-							OptimizedSeqList[OptSeqLine].arg2.type = seqNONE;
-							OptimizedSeqList[OptSeqLine].target = q->arg;
-							OptSeqLine++;
+							Arg_Info* arg = get_arg_info_from_list(q->arg, arg_info_list);
+							if (arg->node == p)
+							{
+								OptimizedSeqList[OptSeqLine].op = ASSI;
+								OptimizedSeqList[OptSeqLine].arg1 = p->seqConstant_list->arg;
+								OptimizedSeqList[OptSeqLine].arg2.type = seqNONE;
+								OptimizedSeqList[OptSeqLine].target = q->arg;
+								OptSeqLine++;
+							}
 							q = q->next;
 						}
 					}
@@ -391,17 +401,22 @@ int get_SeqList_from_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list)
 						Arg_List* q = p->seqID_list;
 						while (q)
 						{
+							Arg_Info* arg = get_arg_info_from_list(q->arg, arg_info_list);
+							if (arg->node == p)
+							{
 							OptimizedSeqList[OptSeqLine].op = ASSI;
 							OptimizedSeqList[OptSeqLine].arg1 =  p->seqMIDVAR_list->arg;
 							OptimizedSeqList[OptSeqLine].arg2.type = seqNONE;
 							OptimizedSeqList[OptSeqLine].target = p->seqID_list->arg;
 							OptSeqLine++;
+							}
 							q = q->next;
 						}
 					}
 					else if (p->seqID_list->next)
 					{
 						Arg_List* q = p->seqID_list->next;
+
 						while (q)
 						{
 							OptimizedSeqList[OptSeqLine].op = ASSI;
