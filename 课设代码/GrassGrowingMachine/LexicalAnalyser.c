@@ -326,7 +326,9 @@ int next5(char nextChar)
 		initWord();
 		nextState = 17;
 	}
-	else if (nextChar == '}' || nextChar == ')' || nextChar == '{' || nextChar == '(' || nextChar == ';')
+	else if (nextChar == '}' || nextChar == ')' || nextChar == '{' || nextChar == '(' || nextChar == ';'
+		|| nextChar == '+' || nextChar == '-' || nextChar == '*' || nextChar == '/' || nextChar == '%'
+		|| nextChar == '<' || nextChar == '>')
 	{
 		wordPop();
 		PTfunc();
@@ -573,7 +575,7 @@ int fcTfunc()
 	}
 	for (int j = i + 1; j < wordSize; j++)
 	{
-		num += (double)(word[j] - 48) * pow(10, i - j - 1);
+		num += (double)(word[j] - 48) * pow(10, i - j);
 	}
 	for (int i = 0; i < fcTline; i++)
 	{

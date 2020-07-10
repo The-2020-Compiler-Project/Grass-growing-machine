@@ -53,6 +53,8 @@ int main(char argc, char* argv[])
     if (!seqfile) return -1;
     FILE* symfile = fopen("D:/Hello_SYMBL.txt", "w");
     if (!symfile) return -1;
+    FILE* optseqfile = fopen("D:/Hello_OptSequence.txt", "w");
+    if (!optseqfile) return -1;
 
     //TOKEN newtoken;
     //while (1)
@@ -62,12 +64,16 @@ int main(char argc, char* argv[])
 
     GrammarAnalyse();
     optimize();
-    //Output_SeqList(OptimizedSeqList, OptSeqLine, seqfile);
+    printf("Optimized!\n");
+    Output_SeqList(SequenceList, SeqLine, seqfile);
+    Output_SeqList(OptimizedSeqList, OptSeqLine, optseqfile);
    
     Output_SYMBL(symfile);
     fclose(seqfile);
     fclose(symfile);
+    fclose(optseqfile);
     DestGenerator(OptimizedSeqList, OptSeqLine, dstfile);
+    printf("Dest file created!\n");
     //DestGenerator(SequenceList, SeqLine, dstfile);
     return 0;
  }
