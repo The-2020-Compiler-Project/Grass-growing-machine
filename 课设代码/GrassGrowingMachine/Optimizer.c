@@ -378,11 +378,15 @@ int get_SeqList_from_DAG_graph(Node_Set* node_set, Arg_Info_List* arg_info_list)
 						Arg_List* q = p->seqID_list;
 						while (q)
 						{
-							OptimizedSeqList[OptSeqLine].op = ASSI;
-							OptimizedSeqList[OptSeqLine].arg1 = p->seqConstant_list->arg;
-							OptimizedSeqList[OptSeqLine].arg2.type = seqNONE;
-							OptimizedSeqList[OptSeqLine].target = q->arg;
-							OptSeqLine++;
+							Arg_Info* arg = get_arg_info_from_list(q->arg, arg_info_list);
+							if (arg->node == p)
+							{
+								OptimizedSeqList[OptSeqLine].op = ASSI;
+								OptimizedSeqList[OptSeqLine].arg1 = p->seqConstant_list->arg;
+								OptimizedSeqList[OptSeqLine].arg2.type = seqNONE;
+								OptimizedSeqList[OptSeqLine].target = q->arg;
+								OptSeqLine++;
+							}
 							q = q->next;
 						}
 					}

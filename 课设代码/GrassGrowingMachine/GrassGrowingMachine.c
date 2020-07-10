@@ -62,7 +62,7 @@ int main(char argc, char* argv[])
 
     GrammarAnalyse();
     optimize();
-    //Output_SeqList(OptimizedSeqList, OptSeqLine, seqfile);
+    Output_SeqList(OptimizedSeqList, OptSeqLine, seqfile);
    
     Output_SYMBL(symfile);
     fclose(seqfile);
